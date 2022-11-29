@@ -100,16 +100,32 @@ FText STextureListRow::GetUsageCount() const
 
 TSharedRef<SWidget> STextureListRow::GetOperate()
 {
-    return SNew(SButton)
+    return
+    SNew(SBox)
+    .HAlign(HAlign_Center)
+    .VAlign(VAlign_Center)
+    [
+        SNew(SButton)
         .Text(LOCTEXT("Operate", "Operate"))
-        .OnClicked(this, &STextureListRow::OnOperateClicked);
+        .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
+        .DesiredSizeScale(FVector2D(0.5f, 0.5f))
+        .ContentPadding(FMargin(2.0, 2.0))
+        .OnClicked(this, &STextureListRow::OnOperateClicked)
+        .Visibility(this, &STextureListRow::GetOperateVisibility)
+        .VAlign(VAlign_Center)
+        .HAlign(HAlign_Center)
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("SystemWideCommands.FindInContentBrowser"))
+        ]
+    ];
+
 }
 
 FReply STextureListRow::OnOperateClicked() const
 {
     const FString TextureName = TextureMemory->Name;
     UObject* Texture = LoadObject<UObject>(nullptr, *TextureName);
-
     if (Texture)
     {
         TArray<UObject*> Textures;
@@ -118,6 +134,17 @@ FReply STextureListRow::OnOperateClicked() const
     }
 
     return FReply::Handled();
+}
+
+EVisibility STextureListRow::GetOperateVisibility() const
+{
+    const FString TextureName = TextureMemory->Name;
+    const UObject* Texture = LoadObject<UObject>(nullptr, *TextureName);
+    if (Texture)
+    {
+        return EVisibility::Visible;
+    }
+    return EVisibility::Hidden;
 }
 
 TSharedRef<SWidget> STextureListRow::GenerateWidgetForColumn(const FName& ColumnName)

@@ -42,6 +42,7 @@ public:
 
     TSharedRef<SWidget> GetOperate();
     FReply OnOperateClicked() const;
+    EVisibility GetOperateVisibility() const;
     
     virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
 
