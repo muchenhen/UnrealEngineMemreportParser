@@ -1007,7 +1007,8 @@ FTextureMemory UMemreportParserManager::TextureMemoryRowSplit(const FString& Str
     {
         TextureMemory.Format = OutStrings[0];
         TextureMemory.LODGroup = OutStrings[1];
-        TextureMemory.Name = OutStrings[2];
+        // OutStrings[2]去掉所有空格
+        TextureMemory.Name = OutStrings[2].Replace(TEXT(" "), TEXT(""));
         TextureMemory.Streaming = OutStrings[3];
         TextureMemory.UsageCount = OutStrings[4];
     }
@@ -1067,6 +1068,18 @@ FTextureTotalStat UMemreportParserManager::TextureTotalStatParser(const TArray<F
                 TextureTotalStat.CountApplicableToMin = OutStrings[1];
                 OutStrings.Empty();
                 Results.Empty();
+            }
+            else if (Results.Num() == 3)
+            {
+                Results[0].ParseIntoArray(OutStrings, TEXT("="), true);
+                TextureTotalStat.TotalSizeInMem = OutStrings[1];
+                OutStrings.Empty();
+                Results[1].ParseIntoArray(OutStrings, TEXT("="), true);
+                TextureTotalStat.TotalSizeOnDisk = OutStrings[1];
+                OutStrings.Empty();
+                Results[2].ParseIntoArray(OutStrings, TEXT("="), true);
+                TextureTotalStat.Count = OutStrings[1];
+                OutStrings.Empty();
             }
             else
             {

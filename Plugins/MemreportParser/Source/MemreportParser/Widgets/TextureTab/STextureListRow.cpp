@@ -90,7 +90,7 @@ FText STextureListRow::GetStreaming() const
 }
 
 FText STextureListRow::GetUsageCount() const
-{   
+{
     if (TextureMemory.IsValid())
     {
         return FText::FromString(TextureMemory->UsageCount);
@@ -107,7 +107,16 @@ TSharedRef<SWidget> STextureListRow::GetOperate()
 
 FReply STextureListRow::OnOperateClicked() const
 {
-    // 索引到目标
+    const FString TextureName = TextureMemory->Name;
+    UObject* Texture = LoadObject<UObject>(nullptr, *TextureName);
+
+    if (Texture)
+    {
+        TArray<UObject*> Textures;
+        Textures.Add(Texture);
+        GEditor->SyncBrowserToObjects(Textures);
+    }
+
     return FReply::Handled();
 }
 
