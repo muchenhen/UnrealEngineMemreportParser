@@ -4,10 +4,6 @@
 UE4 插件  
 开发基于版本4.27 release  
 主要目的是对UE4命令行命令 MemReport -full产生的.memreport文件进行解析，输出各个部分的csv文件或者直接进行可视化，支持多文件对比进行内存变化的分析。
-## 功能开发进度：  
-[PROJECT](https://github.com/users/muchenhen/projects/4)
-
-也可以参看issues。  
 
 ## **感谢**
 
