@@ -34,7 +34,8 @@ void SSingleMemreportFileWindow::Open()
     const TSharedRef<FGlobalTabmanager> TabManager = FGlobalTabmanager::Get();
 
     TabManager->UnregisterAllTabSpawners();
-    
+
+    TabManager->RegisterTabSpawner("MemreportExportTab", FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeExportTab));
     TabManager->RegisterTabSpawner("MemreportTexturesTab", FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeTextureTab));
 
     const TSharedPtr<FTabManager::FLayout> MemreportLayout = FTabManager::NewLayout("MemreportFileWindow_v1.0");
@@ -46,6 +47,7 @@ void SSingleMemreportFileWindow::Open()
         ->Split
         (
             FTabManager::NewStack()
+            ->AddTab("MemreportExportTab", ETabState::OpenedTab)
             ->AddTab("MemreportTexturesTab", ETabState::OpenedTab)
         )
     );
@@ -86,6 +88,11 @@ TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeTextureTab(const FSpawnTabA
     return SNew(STexturesTab)
     .TextureMemories(TextureMemories)
     .TextureTotalStat(TextureTotalStat);
+}
+
+TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeExportTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+    return SNew(SExportTab);
 }
 
 #undef LOCTEXT_NAMESPACE

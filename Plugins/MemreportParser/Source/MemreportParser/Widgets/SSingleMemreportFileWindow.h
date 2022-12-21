@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ExportTab/SExportTab.h"
 #include "MemreportParser/Widgets/TextureTab/STexturesTab.h"
 #include "MemreportParser/Public/MemreportStructs.h"
 
@@ -25,10 +26,16 @@ public:
      */
     TSharedPtr<STexturesTab> TextureTab = MakeShared<STexturesTab>();
 
+    /**
+     * @brief 一些导出按钮的Tab页
+     */
+    TSharedPtr<SExportTab> ExportTab = MakeShared<SExportTab>();
+
 public:
 
     TSharedRef<SDockTab> MakeTextureTab(const FSpawnTabArgs& SpawnTabArgs);
 
+    TSharedRef<SDockTab> MakeExportTab(const FSpawnTabArgs& SpawnTabArgs);
     
 public:
 
