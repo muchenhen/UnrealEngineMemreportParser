@@ -39,13 +39,17 @@ void UMemreportParserManager::LoadFiles()
             TArray<FString> FoundFiles;
             FileContents.Empty();
             FileManager.FindFiles(FoundFiles, *FileFolder, TEXT(".memreport"));
-            FileNames = FoundFiles;
+            for (int i = 0; i < FoundFiles.Num(); i++)
+            {
+                FString FileName = FoundFiles[i].Replace(TEXT(".memreport"), TEXT(""));
+                FileNames.Add(FileName);
+            }
             for (auto& FileName : FoundFiles)
             {
                 FString Content;
                 FString Path = FileFolder / FileName;
                 FFileHelper::LoadFileToString(Content, *Path);
-                FileContents.Add(FileName, Content);
+                FileContents.Add(FileName.Replace(TEXT(".memreport"), TEXT("")), Content);
                 FFileStatData FileStatData = FileManager.GetStatData(*Path);
                 //TODO: 文件的一些属性
                 FileStatData.bIsValid;
@@ -1236,28 +1240,58 @@ FString UMemreportParserManager::TransFStringArrayToFString(const TArray<FString
 FString UMemreportParserManager::GetCSVFileName(const FString& OriFileName, ECSVFileType CSVFileType)
 {
     FString FileName = FileFolder / TEXT("CSVs") / OriFileName;
-    if (CSVFileType == ECSVFileType::Obj)
+
+    switch (CSVFileType)
     {
-        FileName += "-Obj";
+    case Obj:
+        FileName += TEXT("-Obj");
+        break;
+    case SpawnedActors:
+        FileName += TEXT("-SpawnedActors");
+        break;
+    case ConfigCache:
+        FileName += TEXT("-ConfigCache");
+        break;
+    case Texture:
+        FileName += TEXT("-Texture");
+        break;
+    default:
+        break;
     }
-    else if (CSVFileType == ECSVFileType::SpawnedActors)
-    {
-        FileName += "-SpawnedActors";
-    }
-    else if (CSVFileType == ECSVFileType::ConfigCache)
-    {
-        FileName += "-ConfigCache";
-    }
+    
     FileName += TEXT(".csv");
     return FileName;
 }
 
+bool UMemreportParserManager::CheckCurrentFile()
+{
+    if (FilesData.Num() <= 0 || !FilesData.Contains(CurrentFileName))
+    {
+        if (FilesData.Num() <= 0)
+        {
+            UE_LOG(LogMemreportParser, Error, TEXT("FilesData.Num() <= 0"));
+            return false;
+        }
+        if (!FilesData.Contains(CurrentFileName))
+        {
+            UE_LOG(LogMemreportParser, Error, TEXT("FilesData Not find : %s"), *CurrentFileName);
+            for (TTuple<FString, FMemreportFile> Data : FilesData)
+            {
+                UE_LOG(LogMemreportParser, Error, TEXT("FilesData : %s"), *Data.Key);
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
 void UMemreportParserManager::SaveObjListToCSV()
 {
-    if (FilesData.Num() <= 0 || !FilesData.Contains(CurrentFileName)) return;
+    if (!CheckCurrentFile())
+        return;
 
     TArray<FObj> ObjectList = FilesData[CurrentFileName].ObjectList;
-    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::Obj);
+    const FString FileName = GetCSVFileName(FileNames[0], Obj);
 
     TArray<FString> OutStrings;
     OutStrings.Add(TransFStringArrayToFString(FObj::GetHeader()));
@@ -1266,12 +1300,21 @@ void UMemreportParserManager::SaveObjListToCSV()
         OutStrings.Add(TransFStringArrayToFString(Obj.GetDataArray()));
     }
 
-    FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save ObjList to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save ObjList to CSV Failed"));
+    }
 }
 
 void UMemreportParserManager::SaveSpawnedActorsToCSV()
 {
-    if (FilesData.Num() <= 0 || !FilesData.Contains(CurrentFileName)) return;
+    if (!CheckCurrentFile())
+        return;
 
     TArray<FSpawnedActor> SpawnedActors = FilesData[CurrentFileName].SpawnedActors;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::SpawnedActors);
@@ -1282,14 +1325,24 @@ void UMemreportParserManager::SaveSpawnedActorsToCSV()
     {
         OutStrings.Add(TransFStringArrayToFString(SpawnedActor.GetDataArray()));
     }
-    FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save SpawnedActors to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save SpawnedActors to CSV Failed"));
+    }
 }
 
 void UMemreportParserManager::SaveConfigCacheMemoryToCSV()
 {
-    if (FilesData.Num() <= 0 || !FilesData.Contains(CurrentFileName)) return;
+    if (!CheckCurrentFile())
+        return;
+    
     TArray<FConfigCache> ConfigCaches = FilesData[CurrentFileName].ConfigCaches;
-    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::ConfigCache);
+    const FString FileName = GetCSVFileName(FileNames[0], ConfigCache);
 
     TArray<FString> OutStrings;
     OutStrings.Add(TransFStringArrayToFString(FConfigCache::GetHeader()));
@@ -1297,7 +1350,40 @@ void UMemreportParserManager::SaveConfigCacheMemoryToCSV()
     {
         OutStrings.Add(TransFStringArrayToFString(ConfigCache.GetDataArray()));
     }
-    FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save ConfigCache to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save ConfigCache to CSV Failed"));
+    }
+}
+
+void UMemreportParserManager::SaveTexturesToCSV()
+{
+    if (!CheckCurrentFile())
+        return;
+    
+    TArray<FTextureMemory> Textures = FilesData[CurrentFileName].TextureMemories;
+    const FString FileName = GetCSVFileName(FileNames[0], Texture);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FTextureMemory::GetHeader()));
+    for (auto& Texture : Textures)
+    {
+        OutStrings.Add(TransFStringArrayToFString(Texture.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save Texture to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save Texture to CSV Failed"));
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

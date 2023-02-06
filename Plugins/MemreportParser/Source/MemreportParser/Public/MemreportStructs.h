@@ -264,6 +264,38 @@ struct FTextureMemory
     FString Streaming;
     // 使用次数
     FString UsageCount;
+    
+    static TArray<FString> GetHeader()
+    {
+        TArray<FString> Header;
+        Header.Add("CookedWidth");
+        Header.Add("AuthoredBias");
+        Header.Add("CookedSize");
+        Header.Add("InMemWidth");
+        Header.Add("InMemSize");
+        Header.Add("Format");
+        Header.Add("LODGroup");
+        Header.Add("Name");
+        Header.Add("Streaming");
+        Header.Add("UsageCount");
+        return Header;
+    }
+
+     TArray<FString> GetDataArray() const
+     {
+        TArray<FString> Data;
+        Data.Add(CookedWidth);
+        Data.Add(AuthoredBias);
+        Data.Add(CookedSize);
+        Data.Add(InMemWidth);
+        Data.Add(InMemSize);
+        Data.Add(Format);
+        Data.Add(LODGroup);
+        Data.Add(Name);
+        Data.Add(Streaming);
+        Data.Add(UsageCount);
+        return Data;
+    }
 };
 
 struct FTextureGroupStat
@@ -294,7 +326,8 @@ enum ECSVFileType
 {
     Obj,
     SpawnedActors,
-    ConfigCache
+    ConfigCache,
+    Texture
 };
 
 struct FLevels
