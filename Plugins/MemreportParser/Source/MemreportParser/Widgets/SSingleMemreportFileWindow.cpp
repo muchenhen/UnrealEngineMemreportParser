@@ -35,8 +35,11 @@ void SSingleMemreportFileWindow::Open()
 
     TabManager->UnregisterAllTabSpawners();
 
-    TabManager->RegisterTabSpawner("MemreportExportTab", FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeExportTab));
-    TabManager->RegisterTabSpawner("MemreportTexturesTab", FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeTextureTab));
+    const FName ExportTabID = TEXT("ExportTab");
+    const FName TexturesTabID = TEXT("TexturesTab");
+    
+    TabManager->RegisterTabSpawner(ExportTabID, FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeExportTab));
+    TabManager->RegisterTabSpawner(TexturesTabID, FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeTextureTab));
 
     const TSharedPtr<FTabManager::FLayout> MemreportLayout = FTabManager::NewLayout("MemreportFileWindow_v1.0");
     
@@ -47,8 +50,8 @@ void SSingleMemreportFileWindow::Open()
         ->Split
         (
             FTabManager::NewStack()
-            ->AddTab("MemreportExportTab", ETabState::OpenedTab)
-            ->AddTab("MemreportTexturesTab", ETabState::OpenedTab)
+            ->AddTab(ExportTabID, ETabState::OpenedTab)
+            ->AddTab(TexturesTabID, ETabState::OpenedTab)
         )
     );
     
@@ -78,7 +81,7 @@ TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeTextureTab(const FSpawnTabA
 {
     TArray<FTextureMemoryPtr> TextureMemories;
 
-    FTextureTotalStatPtr TextureTotalStat = MakeShareable(new FTextureTotalStat(MemreportFile.TextureTotalStat));
+    const FTextureTotalStatPtr TextureTotalStat = MakeShareable(new FTextureTotalStat(MemreportFile.TextureTotalStat));
     // 将MemreportFile.TextureMemories 转换为TextureMemories
     for (const FTextureMemory& TextureMemory : MemreportFile.TextureMemories)
     {

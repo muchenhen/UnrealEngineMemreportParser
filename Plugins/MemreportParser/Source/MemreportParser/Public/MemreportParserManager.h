@@ -117,12 +117,15 @@ public:
     // 解析Objects的总结行 是一个出现较多的东西
     static FObjectsStat ObjectsStatParser(const FString& String);
 
-public:
+public: // 以下是一些导出文件相关的函数
+    
     // 把字符串数组转成一个字符串
     static FString TransFStringArrayToFString(const TArray<FString>& FStringArray);
 
     // 生成CSV文件名
     static FString GetCSVFileName(const FString& OriFileName, ECSVFileType CSVFileType);
+
+    static bool CheckCurrentFile();
 
     // 输出所有Object的信息到CSV文件
     static void SaveObjListToCSV();
@@ -132,4 +135,7 @@ public:
 
     // 输出所有的Config信息到CSV文件
     static void SaveConfigCacheMemoryToCSV();
+
+    // 输出所有的Texture信息到CSV文件
+    static void SaveTexturesToCSV();
 };

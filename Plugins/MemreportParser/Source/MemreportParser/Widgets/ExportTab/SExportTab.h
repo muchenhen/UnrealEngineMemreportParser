@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
 
 /**
  * 
@@ -16,10 +15,19 @@ public:
         }
 
     SLATE_END_ARGS()
-
-    FReply ExportObjectsCSV();
-    FReply ExportActorsCSV();
-    FReply ExportConfigCacheCSV();
-    /** Constructs this widget with InArgs */
+    
     void Construct(const FArguments& InArgs);
+
+    // 导出Obj List到csv文件
+    FReply ExportObjectsCSV();
+    
+    // 导出SpawnActors List到csv
+    FReply ExportActorsCSV();
+    
+    // 导出ConfigCache信息到csv
+    FReply ExportConfigCacheCSV();
+
+    // 导出Textures到csv
+    FReply ExportTexturesCSV();
+    
 };

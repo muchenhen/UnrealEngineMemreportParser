@@ -29,6 +29,12 @@ FReply SExportTab::ExportConfigCacheCSV()
     return FReply::Handled();
 }
 
+FReply SExportTab::ExportTexturesCSV()
+{
+    UMemreportParserManager::SaveTexturesToCSV();
+    return FReply::Handled();
+}
+
 void SExportTab::Construct(const FArguments& InArgs)
 {
     SDockTab::Construct(SDockTab::FArguments()
@@ -47,6 +53,7 @@ void SExportTab::Construct(const FArguments& InArgs)
                 [
                     SNew(SButton)
                     .Text(LOCTEXT("ExportObjectsCSV", "Export Objects CSV"))
+                    .ToolTipText(LOCTEXT("ExportObjectsCSV_ToolTip", "Export Objects CSV") )
                     .OnClicked(this, &SExportTab::ExportObjectsCSV)
                 ]
 
@@ -58,6 +65,7 @@ void SExportTab::Construct(const FArguments& InArgs)
                 [
                     SNew(SButton)
                     .Text(LOCTEXT("ExportActorsCSV", "Export Actors CSV"))
+                    .ToolTipText(LOCTEXT("ExportActorsCSV_ToolTip", "Export Actors CSV") )
                     .OnClicked(this, &SExportTab::ExportActorsCSV)
                 ]
 
@@ -69,7 +77,20 @@ void SExportTab::Construct(const FArguments& InArgs)
                 [
                     SNew(SButton)
                     .Text(LOCTEXT("ExportConfigCacheCSV", "Export ConfigCache CSV"))
+                    .ToolTipText(LOCTEXT("ExportConfigCacheCSV_ToolTip", "Export ConfigCache CSV") )
                     .OnClicked(this, &SExportTab::ExportConfigCacheCSV)
+                ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .HAlign(HAlign_Center)
+                .VAlign(VAlign_Center)
+                .Padding(FMargin(15.0f))
+                [
+                    SNew(SButton)
+                    .Text(LOCTEXT("ExportTexturesCSV", "Export Textures CSV"))
+                    .ToolTipText(LOCTEXT("ExportTexturesCSV_ToolTip", "Export Textures CSV") )
+                    .OnClicked(this, &SExportTab::ExportTexturesCSV)
                 ]
             ]
         ]);
