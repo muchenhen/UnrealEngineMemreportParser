@@ -79,7 +79,7 @@ void STextureOverview::Construct(const FArguments& InArgs)
                   .AutoWidth()
                 [
                     SNew(STextBlock)
-                   .Text(LOCTEXT("STextureOverview_TotalSizeInMem", "Total Size On Disk: "))
+                   .Text(LOCTEXT("STextureOverview_TotalSizeOnDisk", "Total Size On Disk: "))
                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 11))
                    .ColorAndOpacity(FLinearColor::White)
                 ]
