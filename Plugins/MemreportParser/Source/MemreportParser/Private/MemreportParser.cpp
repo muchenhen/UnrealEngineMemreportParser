@@ -10,6 +10,7 @@
 #include "LevelEditor.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Layout/SBox.h"
+#include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
 #include "MemreportParserManager.h"
 #include "Framework/Notifications/NotificationManager.h"
@@ -23,6 +24,8 @@ SMemreportStartPageWindow* FMemreportParserModule::MemreportStartPageWindow = nu
 
 void FMemreportParserModule::StartupModule()
 {
+	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+
 	FMemreportParserStyle::Initialize();
 	FMemreportParserStyle::ReloadTextures();
 
@@ -72,15 +75,19 @@ TSharedRef<SDockTab> FMemreportParserModule::OnSpawnPluginTab(const FSpawnTabArg
 
 FReply FMemreportParserModule::OnClickChooseFileFolder() const
 {
-    const FString OutputDirectory;
-    
+    FString OutputDirectory;
+    const void* ParentWindowHandle = FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr);
     const FString Title = LOCTEXT("DatasmithDirProducerFolderTitle", "Choose a folder").ToString();
     const FString DefaultLocation(FEditorDirectories::Get().GetLastDirectory(ELastDirectory::GENERIC_IMPORT));
 
     const FString OpenPath = FPaths::ProjectContentDir();
     const FString DefaultDirectory = FPaths::ConvertRelativePathToFull(OpenPath);
-    
-
+    IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+    const bool bFolderSelected = DesktopPlatform->OpenDirectoryDialog(
+        ParentWindowHandle,
+        Title,
+        DefaultDirectory,
+        OutputDirectory);
     UMemreportParserManager::SetFileFolder(OutputDirectory);
     UMemreportParserManager::LoadFiles();
     MemreportStartPageWindow->SetMemreportViewModels(UMemreportParserManager::GetStats());
@@ -90,6 +97,7 @@ FReply FMemreportParserModule::OnClickChooseFileFolder() const
 
 void FMemreportParserModule::PluginButtonClicked()
 {
+	// FGlobalTabmanager::Get()->TryInvokeTab(MemreportParserTabName);
     constexpr float WindowWidth = 1280.0f;
     constexpr float WindowHeight = 720.0f;
     // const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(10.0f, 10.0f);
@@ -98,7 +106,7 @@ void FMemreportParserModule::PluginButtonClicked()
     const TSharedRef<SWindow> RootWindow =
         SNew(SWindow)
         .AutoCenter(EAutoCenter::PreferredWorkArea)
-        .Title(NSLOCTEXT("MemreportParserModule", "MemreportParserBrowserAppName", "MemreportParser Browser"))
+        .Title(NSLOCTEXT("TraceInsightsModule", "UnrealInsightsBrowserAppName", "Unreal Insights Session Browser"))
         .IsInitiallyMaximized(false)
         .ClientSize(FVector2D(WindowWidth, WindowHeight))
         .SupportsMaximize(true)
@@ -160,16 +168,22 @@ void FMemreportParserModule::RegisterMenus()
 	FToolMenuOwnerScoped OwnerScoped(this);
 
 	{
-        UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-        FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
-		Section.AddMenuEntryWithCommandList(FMemreportParserCommands::Get().OpenPluginWindow, PluginCommands);
+		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
+		{
+			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
+			Section.AddMenuEntryWithCommandList(FMemreportParserCommands::Get().OpenPluginWindow, PluginCommands);
+		}
 	}
 
 	{
-        UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
-        FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings");
-        FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FMemreportParserCommands::Get().OpenPluginWindow));
-		Entry.SetCommandList(PluginCommands);
+		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
+		{
+			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings");
+			{
+				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FMemreportParserCommands::Get().OpenPluginWindow));
+				Entry.SetCommandList(PluginCommands);
+			}
+		}
 	}
 }
 
