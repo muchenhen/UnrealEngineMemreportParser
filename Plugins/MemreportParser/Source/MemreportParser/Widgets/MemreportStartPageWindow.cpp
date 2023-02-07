@@ -36,7 +36,7 @@ void SMemreportStartPageWindow::SetMemreportViewModels(TArray<FStatMemory> StatM
     {
         const TSharedPtr<FStatMemory> Model = MakeShareable(new FStatMemory);
         Model.Get()->FileName = StatMemory.FileName;
-        Model.Get()->BootTime = StatMemory.BootTime;
+        Model.Get()->SinceBootTime = StatMemory.SinceBootTime;
         Model.Get()->Platform = StatMemory.Platform;
         Model.Get()->PhysicalMemoryUsed = StatMemory.PhysicalMemoryUsed;
         Model.Get()->VirtualMemoryUsed = StatMemory.VirtualMemoryUsed;
@@ -127,7 +127,7 @@ TSharedRef<SWidget> SMemreportStartPageWindow::ConstructFilesPanel()
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("PlatformColumn", "Platform"))
 
-                + SHeaderRow::Column(FName(TEXT("BootTime")))
+                + SHeaderRow::Column(FName(TEXT("SinceBootTime")))
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("BootTimeColumn", "Boot Time"))
 
@@ -180,7 +180,7 @@ FText SMemreportListRow::GetBootTime() const
     const TSharedPtr<FStatMemory> Pin = WeakTrace.Pin();
     if (Pin.IsValid())
     {
-        return FText::FromString(Pin->BootTime);
+        return FText::FromString(Pin->SinceBootTime);
     }
     return FText::GetEmpty();
 }
@@ -275,7 +275,7 @@ TSharedRef<SWidget> SMemreportListRow::GenerateWidgetForColumn(const FName& Colu
                    // .ToolTip(SMemreportListRow::GetTraceTooltip())
                ];
     }
-    if (ColumnName == FName(TEXT("BootTime")))
+    if (ColumnName == FName(TEXT("SinceBootTime")))
     {
         return SNew(SBox)
                .Padding(FMargin(4.0, 0.0))

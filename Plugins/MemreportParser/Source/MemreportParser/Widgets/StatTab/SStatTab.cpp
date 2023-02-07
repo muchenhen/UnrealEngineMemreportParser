@@ -14,6 +14,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SStatTab::Construct(const FArguments& InArgs)
 {
+    StatMemory = InArgs._StatMemory;
+    
     SDockTab::Construct(SDockTab::FArguments()
         .TabRole(ETabRole::NomadTab)
         
@@ -31,7 +33,7 @@ void SStatTab::Construct(const FArguments& InArgs)
                 .HeightOverride(100)
                 .Clipping(EWidgetClipping::ClipToBounds)
                 [
-                    ConstructStatPanel()
+                    ConstructStatPanel(StatMemory)
                 ]
             ]
 
@@ -51,7 +53,7 @@ void SStatTab::Construct(const FArguments& InArgs)
                     .Padding(FMargin(2.0f))
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
-                        ConstructMemoryPanel()
+                        ConstructMemoryPanel(StatMemory)
                     ]
                 ]
             ]
@@ -66,13 +68,13 @@ void SStatTab::Construct(const FArguments& InArgs)
                 .HeightOverride(420)
                 .Clipping(EWidgetClipping::ClipToBounds)
                 [
-                    ConstructFMallocBinned2Panel()
+                    ConstructFMallocBinned2Panel(StatMemory)
                 ]
             ]
 	    ]);
 }
 
-TSharedRef<SWidget> SStatTab::ConstructStatPanel()
+TSharedRef<SWidget> SStatTab::ConstructStatPanel(const FStatMemory& InFStatMemory)
 {
     const FTextBlockStyle TextBlockStyle =
         FTextBlockStyle()
@@ -83,7 +85,8 @@ TSharedRef<SWidget> SStatTab::ConstructStatPanel()
     // 一个垂直框
     return SNew(SVerticalBox)
             .Clipping(EWidgetClipping::Inherit)
-            // 一个水平框
+    
+            // SinceBootTime
             + SVerticalBox::Slot()
             .FillHeight(1)
             .HAlign(HAlign_Fill)
@@ -109,11 +112,12 @@ TSharedRef<SWidget> SStatTab::ConstructStatPanel()
                 [
                     SNew(STextBlock)
                     .Clipping(EWidgetClipping::Inherit)
-                    .Text(FText::FromString(TEXT("756.57")))
+                    .Text(FText::FromString(InFStatMemory.SinceBootTime))
                     .TextStyle(&TextBlockStyle)
                 ]
             ]
-            
+
+            // Platform
             + SVerticalBox::Slot()
             .FillHeight(1)
             .HAlign(HAlign_Fill)
@@ -140,13 +144,13 @@ TSharedRef<SWidget> SStatTab::ConstructStatPanel()
                 [
                     SNew(STextBlock)
                     .Clipping(EWidgetClipping::Inherit)
-                    .Text(FText::FromString(TEXT("Android")))
+                    .Text(FText::FromString(InFStatMemory.Platform))
                     .TextStyle(&TextBlockStyle)
                 ]
             ];
 }
 
-TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
+TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMemory)
 {
     const FTextBlockStyle HeaderTextBlockStyle =
         FTextBlockStyle()
@@ -174,6 +178,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
             SNew(SVerticalBox)
             .Clipping(EWidgetClipping::Inherit)
 
+            // 内存类型
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -186,6 +191,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
                 .TextStyle(&HeaderTextBlockStyle)
             ]
 
+            // Process Physical Memory
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -198,6 +204,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
                 .TextStyle(&TextBlockStyle)
             ]
 
+            // Process Virtual Memory
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -210,6 +217,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
                 .TextStyle(&TextBlockStyle)
             ]
 
+            // Physical Memory
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -222,6 +230,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
                 .TextStyle(&TextBlockStyle)
             ]
 
+            // Virtual Memory
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -245,6 +254,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
             SNew(SVerticalBox)
             .Clipping(EWidgetClipping::Inherit)
 
+            // 已使用的内存大小
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
@@ -254,6 +264,18 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
                 .Clipping(EWidgetClipping::Inherit)
                 .Text(LOCTEXT("Used_LOC", "Used(MB)"))
                 .TextStyle(&HeaderTextBlockStyle)
+            ]
+
+            // Process Physical Memory Used Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.PhysicalMemoryUsed))
+                .TextStyle(&TextBlockStyle)
             ]
         ]
 
@@ -283,7 +305,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel()
     return MemoryPanel;
 }
 
-TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel()
+TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& InFStatMemory)
 {
     // 内存类型的字体样式
     const FTextBlockStyle HeaderTextBlockStyle =

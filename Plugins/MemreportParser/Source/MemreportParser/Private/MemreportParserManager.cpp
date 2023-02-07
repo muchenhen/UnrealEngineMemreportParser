@@ -451,7 +451,7 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
             TempString = TempString.Replace(TEXT(" "), TEXT(""));
             TArray<FString> OutArray;
             TempString.ParseIntoArray(OutArray, TEXT(":"), true);
-            StatMemory.BootTime = OutArray[1];
+            StatMemory.SinceBootTime = OutArray[1];
         }
 
         // Platform

@@ -22,12 +22,16 @@ public:
     static FTextBlockStyle GetStatTextBlockStyle();
 
     // STAT相关的显示区域
-    TSharedRef<SWidget> ConstructStatPanel();
+    TSharedRef<SWidget> ConstructStatPanel(const FStatMemory& InFStatMemory);
 
     // 各类Memory的显示区域
-    TSharedRef<SWidget> ConstructMemoryPanel();
+    TSharedRef<SWidget> ConstructMemoryPanel(const FStatMemory& InFStatMemory);
 
     // FMallocBinned2 Mem report 的显示区域
-    TSharedRef<SWidget> ConstructFMallocBinned2Panel();
+    TSharedRef<SWidget> ConstructFMallocBinned2Panel(const FStatMemory& InFStatMemory);
+
+private:
+
+    FStatMemory StatMemory;
     
 };

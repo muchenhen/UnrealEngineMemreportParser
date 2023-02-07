@@ -83,7 +83,8 @@ void SSingleMemreportFileWindow::Refresh() const
 
 TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeStatTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-    return SNew(SStatTab);
+    return SNew(SStatTab)
+    .StatMemory(MemreportFile.StatMemory);
 }
 
 TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeTextureTab(const FSpawnTabArgs& SpawnTabArgs)

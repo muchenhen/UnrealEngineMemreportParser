@@ -3,12 +3,19 @@ DECLARE_LOG_CATEGORY_EXTERN(LogMemreportParser, Display, Display);
 
 struct FStatMemory
 {
+    // 文件名
     FString FileName;
-    FString BootTime;
+    // 启动至今的时间
+    FString SinceBootTime;
+    // 平台
     FString Platform;
+    // 进程的物理内存使用情况
     FString PhysicalMemoryUsed;
+    // 进程的虚拟内存使用情况
     FString VirtualMemoryUsed;
+    // 小内存池中的已分配的内存
     FString SmallPoolAllocations;
+    // 从操作系统分配的小内存池大小
     FString SmallPoolOSAllocated;
     FString LargePoolRequestedAllocations;
     FString LargePoolOSAllocated;
