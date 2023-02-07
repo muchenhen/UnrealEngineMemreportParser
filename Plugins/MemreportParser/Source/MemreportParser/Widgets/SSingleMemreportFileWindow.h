@@ -2,6 +2,7 @@
 #include "ExportTab/SExportTab.h"
 #include "MemreportParser/Widgets/TextureTab/STexturesTab.h"
 #include "MemreportParser/Public/MemreportStructs.h"
+#include "StatTab/SStatTab.h"
 
 typedef TSharedPtr<FTextureMemory> FTextureMemoryPtr;
 
@@ -20,6 +21,10 @@ public:
     FMemreportFile MemreportFile;
 
 public:
+    /**
+     * @brief Stat相关内存的Tab页
+     */
+    TSharedPtr<SStatTab> StatTab = MakeShared<SStatTab>();
     
     /**
      * @brief Texture相关内存的Tab页
@@ -33,6 +38,8 @@ public:
 
 public:
 
+    TSharedRef<SDockTab> MakeStatTab(const FSpawnTabArgs& SpawnTabArgs);
+    
     TSharedRef<SDockTab> MakeTextureTab(const FSpawnTabArgs& SpawnTabArgs);
 
     TSharedRef<SDockTab> MakeExportTab(const FSpawnTabArgs& SpawnTabArgs);
