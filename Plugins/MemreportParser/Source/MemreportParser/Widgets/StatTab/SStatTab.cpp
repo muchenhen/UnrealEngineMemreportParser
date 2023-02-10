@@ -3,6 +3,7 @@
 
 #include "SStatTab.h"
 
+#include "MemreportTools.h"
 #include "SlateOptMacros.h"
 #include "Engine/AssetManager.h"
 #include "Framework/Styling/TextBlockWidgetStyle.h"
@@ -98,14 +99,21 @@ void SStatTab::Construct(const FArguments& InArgs)
             + SOverlay::Slot()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Top)
-            .Padding(650,10,0,0)
+            .Padding(650,10,5,0)
             [
-                SNew(SBox)
-                .WidthOverride(600)
-                .HeightOverride(420)
-                .Clipping(EWidgetClipping::ClipToBounds)
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(MemreportTools::StringToSlateColor("ffaf65"))
+                .Content()
                 [
-                    ConstructFMallocBinned2Panel(StatMemory)
+                    SNew(SBox)
+                    .WidthOverride(600)
+                    .HeightOverride(420)
+                    .Padding(FMargin(2.0f))
+                    .Clipping(EWidgetClipping::ClipToBounds)
+                    [
+                        ConstructFMallocBinned2Panel(StatMemory)
+                    ]
                 ]
             ]
 	    ]);
