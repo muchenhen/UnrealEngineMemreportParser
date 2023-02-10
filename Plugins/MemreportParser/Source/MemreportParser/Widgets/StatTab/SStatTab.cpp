@@ -623,7 +623,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Constants.BinnedPageSizeValue_LOC", "65536"))
+                .Text(FText::FromString(InFStatMemory.ConstantsBinnedPageSize))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -655,7 +655,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Constants.BinnedAllocationGranularityValue_LOC", "65536"))
+                .Text(FText::FromString(InFStatMemory.ConstantsBinnedAllocationGranularity))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -687,7 +687,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Small Pool AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.SmallPoolAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -719,7 +719,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Small Pool OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.SmallPoolOSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -751,7 +751,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Large Pool Requested AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.LargePoolRequestedAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -783,7 +783,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Large Pool OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.LargePoolOSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -815,7 +815,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Requested AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.RequestedAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -847,7 +847,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.OSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -879,7 +879,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("PoolInfoValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.PoolInfo))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -911,7 +911,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("HashValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.Hash))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -943,7 +943,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("TLSValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.TLS))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -975,7 +975,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Total allocated from OSValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.TotalAllocatedFromOS))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -1007,7 +1007,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Cached free OS pagesValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.CachedFreeOSPages))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
