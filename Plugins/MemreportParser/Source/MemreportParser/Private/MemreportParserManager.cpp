@@ -60,7 +60,9 @@ void UMemreportParserManager::LoadFiles()
             for (auto& FileContent : FileContents)
             {
                 FString FileName = FileContent.Key.Replace(TEXT(".memreport"), TEXT(""));
-                FilesData.Add(FileName) = FileParser(FileContent.Value);
+                FMemreportFile ParsedFileData = FileParser(FileContent.Value);
+                ParsedFileData.StatMemory.FileName = FileName;
+                FilesData.Add(FileName) = ParsedFileData;
             }
         }
     }
@@ -104,7 +106,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
     int EndTextureTotal = 0;
 
     int StartSounds = 0;
-    int EndSounds = 0;
+    // int EndSounds = 0;
 
     int StartParticleSystems = 0;
     int EndParticleSystems = 0;
@@ -125,11 +127,11 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
     for (auto& String : StringArray)
     {
         // Stats
-        if (String.Contains(TEXT("Platform Memory Stats")) && StartStat == 0)
+        if (String.Contains(TEXT("CommandLine Options")) && StartStat == 0)
         {
-            StartStat = i;
+            StartStat = 1;
         }
-        else if (String.Contains(TEXT("Memory Stats:")) && EndStat == 0 && StartStat != 0)
+        else if (String.Contains(TEXT("Cached free OS pages:")) && EndStat == 0 && StartStat != 0)
         {
             EndStat = i;
         }
@@ -478,25 +480,101 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
         // Process Physical Memory
         if (String.Contains("Process Physical Memory"))
         {
-            const FString SubStr1 = "Memory: ";
-            const FString SubStr2 = "MB";
-            StatMemory.PhysicalMemoryUsed = GetMB(SubStr1, SubStr2);
-            StatMemory.PhysicalMemoryUsed = StatMemory.PhysicalMemoryUsed.Replace(TEXT(" "), TEXT(""));
-            StatMemory.PhysicalMemoryUsed = StatMemory.PhysicalMemoryUsed.Replace(TEXT("M"), TEXT(""));
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num()>=2)
+            {
+                StatMemory.ProcessPhysicalMemoryUsed = Strings[0];
+                StatMemory.ProcessPhysicalMemoryPeak = Strings[1];
+            }
             continue;
         }
-
+        
         // Process Virtual Memory
         if (String.Contains("Process Virtual Memory"))
         {
-            const FString SubStr1 = "Memory: ";
-            const FString SubStr2 = "MB";
-            StatMemory.VirtualMemoryUsed = GetMB(SubStr1, SubStr2);
-            StatMemory.VirtualMemoryUsed = StatMemory.VirtualMemoryUsed.Replace(TEXT(" "), TEXT(""));
-            StatMemory.VirtualMemoryUsed = StatMemory.VirtualMemoryUsed.Replace(TEXT("M"), TEXT(""));
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 2)
+            {
+                StatMemory.ProcessVirtualMemoryUsed = Strings[0];
+                StatMemory.ProcessVirtualMemoryPeak = Strings[1];
+            }
             continue;
         }
 
+        // Physical Memory
+        if (String.Contains("Physical Memory:"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 3)
+            {
+                StatMemory.PhysicalMemoryUsed = Strings[0];
+                StatMemory.PhysicalMemoryFree = Strings[1];
+                StatMemory.PhysicalMemoryTotal = Strings[2];
+            }
+            continue;
+        }
+
+        // Virtual Memory
+        if (String.Contains("Virtual Memory:"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 3)
+            {
+                StatMemory.VirtualMemoryUsed = Strings[0];
+                StatMemory.VirtualMemoryFree = Strings[1];
+                StatMemory.VirtualMemoryTotal = Strings[2];
+            }
+            continue;
+        }
+
+        // Constants.BinnedPageSize
+        if (String.Contains("Constants.BinnedPageSize"))
+        {
+            TArray<FString> Output;
+            String.ParseIntoArray(Output, TEXT("="), true);
+            if (Output.Num() >=2)
+            {
+                StatMemory.ConstantsBinnedPageSize = Output[1];
+            }
+            continue;
+        }
+
+        // Constants.BinnedAllocationGranularity
+        if (String.Contains("Constants.BinnedAllocationGranularity"))
+        {
+            TArray<FString> Output;
+            String.ParseIntoArray(Output, TEXT("="), true);
+            if (Output.Num() >=2)
+            {
+                StatMemory.ConstantsBinnedAllocationGranularity = Output[1];
+            }
+            continue;
+        }
+        
         // Small Pool Allocations
         if (String.Contains("Small Pool Allocations"))
         {
@@ -535,6 +613,75 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
             StatMemory.LargePoolOSAllocated = GetMB(SubStr1, SubStr2);
             StatMemory.LargePoolOSAllocated = StatMemory.LargePoolOSAllocated.Replace(TEXT("m"), TEXT(""));
             continue;
+        }
+
+        // Requested Allocations
+        if (String.Contains("Requested Allocations"))
+        {
+            const FString SubStr1 = "Allocations: ";
+            const FString SubStr2 = "mb";
+            StatMemory.RequestedAllocations = GetMB(SubStr1, SubStr2);
+            StatMemory.RequestedAllocations = StatMemory.RequestedAllocations.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // OS Allocated
+        if (String.Contains("OS Allocated"))
+        {
+            const FString SubStr1 = "Allocated: ";
+            const FString SubStr2 = "mb";
+            StatMemory.OSAllocated = GetMB(SubStr1, SubStr2);
+            StatMemory.OSAllocated = StatMemory.OSAllocated.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // PoolInfo
+        if (String.Contains("PoolInfo"))
+        {
+            const FString SubStr1 = "PoolInfo: ";
+            const FString SubStr2 = "mb";
+            StatMemory.PoolInfo = GetMB(SubStr1, SubStr2);
+            StatMemory.PoolInfo = StatMemory.PoolInfo.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // Hash
+        if (String.Contains("Hash"))
+        {
+            const FString SubStr1 = "Hash: ";
+            const FString SubStr2 = "mb";
+            StatMemory.Hash = GetMB(SubStr1, SubStr2);
+            StatMemory.Hash = StatMemory.Hash.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // TLS
+        if (String.Contains("TLS"))
+        {
+            const FString SubStr1 = "TLS: ";
+            const FString SubStr2 = "mb";
+            StatMemory.TLS = GetMB(SubStr1, SubStr2);
+            StatMemory.TLS = StatMemory.TLS.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // Total allocated from OS
+        if (String.Contains("Total allocated from OS"))
+        {
+            const FString SubStr1 = "Total allocated from OS: ";
+            const FString SubStr2 = "mb";
+            StatMemory.TotalAllocatedFromOS = GetMB(SubStr1, SubStr2);
+            StatMemory.TotalAllocatedFromOS = StatMemory.TotalAllocatedFromOS.Replace(TEXT("m"), TEXT(""));
+            continue;
+        }
+
+        // Cached free OS pages
+        if (String.Contains("Cached free OS pages"))
+        {
+            const FString SubStr1 = "Cached free OS pages: ";
+            const FString SubStr2 = "mb";
+            StatMemory.CachedFreeOSPages = GetMB(SubStr1, SubStr2);
+            StatMemory.CachedFreeOSPages = StatMemory.CachedFreeOSPages.Replace(TEXT("m"), TEXT(""));
         }
     }
     return StatMemory;

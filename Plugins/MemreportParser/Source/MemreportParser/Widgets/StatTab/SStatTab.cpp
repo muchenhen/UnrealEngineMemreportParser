@@ -274,7 +274,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMem
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(FText::FromString(InFStatMemory.PhysicalMemoryUsed))
+                .Text(FText::FromString(InFStatMemory.ProcessPhysicalMemoryUsed))
                 .TextStyle(&TextBlockStyle)
             ]
         ]
