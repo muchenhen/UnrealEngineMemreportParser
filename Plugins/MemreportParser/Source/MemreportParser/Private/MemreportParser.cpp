@@ -95,24 +95,6 @@ FReply FMemreportParserModule::OnClickChooseFileFolder() const
     return FReply::Handled();
 }
 
-FReply FMemreportParserModule::OnClickSaveObjectsCSVFile()
-{
-    UMemreportParserManager::SaveObjListToCSV();
-    return FReply::Handled();
-}
-
-FReply FMemreportParserModule::SaveSpawnedActorsCSVFile()
-{
-    UMemreportParserManager::SaveSpawnedActorsToCSV();
-    return FReply::Handled();
-}
-
-FReply FMemreportParserModule::OnClickSaveConfigCacheMemory()
-{
-    UMemreportParserManager::SaveConfigCacheMemoryToCSV();
-    return FReply::Handled();
-}
-
 void FMemreportParserModule::PluginButtonClicked()
 {
 	// FGlobalTabmanager::Get()->TryInvokeTab(MemreportParserTabName);

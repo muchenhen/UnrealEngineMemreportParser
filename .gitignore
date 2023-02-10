@@ -48,6 +48,7 @@ Binaries/Win64/MyProjectEditor-Win64-DebugGame.target
 *.pdb
 Binaries/*
 Content/*
+!Content/Localization
 Android_ASTC/*
 Build/*
 Packed/*

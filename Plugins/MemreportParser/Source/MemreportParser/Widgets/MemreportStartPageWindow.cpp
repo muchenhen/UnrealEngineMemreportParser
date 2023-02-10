@@ -36,10 +36,10 @@ void SMemreportStartPageWindow::SetMemreportViewModels(TArray<FStatMemory> StatM
     {
         const TSharedPtr<FStatMemory> Model = MakeShareable(new FStatMemory);
         Model.Get()->FileName = StatMemory.FileName;
-        Model.Get()->BootTime = StatMemory.BootTime;
+        Model.Get()->SinceBootTime = StatMemory.SinceBootTime;
         Model.Get()->Platform = StatMemory.Platform;
-        Model.Get()->PhysicalMemoryUsed = StatMemory.PhysicalMemoryUsed;
-        Model.Get()->VirtualMemoryUsed = StatMemory.VirtualMemoryUsed;
+        Model.Get()->ProcessPhysicalMemoryUsed = StatMemory.ProcessPhysicalMemoryUsed;
+        Model.Get()->ProcessVirtualMemoryUsed = StatMemory.ProcessVirtualMemoryUsed;
         Model.Get()->SmallPoolAllocations = StatMemory.SmallPoolAllocations;
         Model.Get()->SmallPoolOSAllocated = StatMemory.SmallPoolOSAllocated;
         Model.Get()->LargePoolRequestedAllocations = StatMemory.LargePoolRequestedAllocations;
@@ -127,15 +127,15 @@ TSharedRef<SWidget> SMemreportStartPageWindow::ConstructFilesPanel()
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("PlatformColumn", "Platform"))
 
-                + SHeaderRow::Column(FName(TEXT("BootTime")))
+                + SHeaderRow::Column(FName(TEXT("SinceBootTime")))
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("BootTimeColumn", "Boot Time"))
 
-                + SHeaderRow::Column(FName(TEXT("PhysicalMemoryUsed")))
+                + SHeaderRow::Column(FName(TEXT("ProcessPhysicalMemoryUsed")))
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("PhysicalMemoryUsedColumn", "Physical Memory Used"))
 
-                + SHeaderRow::Column(FName(TEXT("VirtualMemoryUsed")))
+                + SHeaderRow::Column(FName(TEXT("ProcessVirtualMemoryUsed")))
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("VirtualMemoryUsedColumn", "Virtual Memory Used"))
 
@@ -180,7 +180,7 @@ FText SMemreportListRow::GetBootTime() const
     const TSharedPtr<FStatMemory> Pin = WeakTrace.Pin();
     if (Pin.IsValid())
     {
-        return FText::FromString(Pin->BootTime);
+        return FText::FromString(Pin->SinceBootTime);
     }
     return FText::GetEmpty();
 }
@@ -200,7 +200,7 @@ FText SMemreportListRow::GetPhysicalMemoryUsed() const
     const TSharedPtr<FStatMemory> Pin = WeakTrace.Pin();
     if (Pin.IsValid())
     {
-        return FText::FromString(Pin->PhysicalMemoryUsed);
+        return FText::FromString(Pin->ProcessPhysicalMemoryUsed);
     }
     return FText::GetEmpty();
 }
@@ -210,7 +210,7 @@ FText SMemreportListRow::GetVirtualMemoryUsed() const
     const TSharedPtr<FStatMemory> Pin = WeakTrace.Pin();
     if (Pin.IsValid())
     {
-        return FText::FromString(Pin->VirtualMemoryUsed);
+        return FText::FromString(Pin->ProcessVirtualMemoryUsed);
     }
     return FText::GetEmpty();
 }
@@ -275,7 +275,7 @@ TSharedRef<SWidget> SMemreportListRow::GenerateWidgetForColumn(const FName& Colu
                    // .ToolTip(SMemreportListRow::GetTraceTooltip())
                ];
     }
-    if (ColumnName == FName(TEXT("BootTime")))
+    if (ColumnName == FName(TEXT("SinceBootTime")))
     {
         return SNew(SBox)
                .Padding(FMargin(4.0, 0.0))
@@ -295,7 +295,7 @@ TSharedRef<SWidget> SMemreportListRow::GenerateWidgetForColumn(const FName& Colu
                    // .ToolTip(SMemreportListRow::GetTraceTooltip())
                ];
     }
-    if (ColumnName == FName(TEXT("PhysicalMemoryUsed")))
+    if (ColumnName == FName(TEXT("ProcessPhysicalMemoryUsed")))
     {
         return SNew(SBox)
                .Padding(FMargin(4.0, 0.0))
@@ -305,7 +305,7 @@ TSharedRef<SWidget> SMemreportListRow::GenerateWidgetForColumn(const FName& Colu
                    // .ToolTip(SMemreportListRow::GetTraceTooltip())
                ];
     }
-    if (ColumnName == FName(TEXT("VirtualMemoryUsed")))
+    if (ColumnName == FName(TEXT("ProcessVirtualMemoryUsed")))
     {
         return SNew(SBox)
                .Padding(FMargin(4.0, 0.0))

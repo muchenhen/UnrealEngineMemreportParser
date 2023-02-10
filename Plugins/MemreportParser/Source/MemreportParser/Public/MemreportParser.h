@@ -27,12 +27,6 @@ private:
 
 	FReply OnClickChooseFileFolder() const;
 
-    FReply OnClickSaveObjectsCSVFile();
-
-    FReply SaveSpawnedActorsCSVFile();
-
-    FReply OnClickSaveConfigCacheMemory();
-
 private:
 	TSharedPtr<class FUICommandList> PluginCommands;
 

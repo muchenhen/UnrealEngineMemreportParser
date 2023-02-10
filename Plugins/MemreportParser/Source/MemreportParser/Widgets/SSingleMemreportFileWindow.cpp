@@ -35,9 +35,11 @@ void SSingleMemreportFileWindow::Open()
 
     TabManager->UnregisterAllTabSpawners();
 
+    const FName StatTabID = TEXT("StatTab");
     const FName ExportTabID = TEXT("ExportTab");
     const FName TexturesTabID = TEXT("TexturesTab");
-    
+
+    TabManager->RegisterTabSpawner(StatTabID, FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeStatTab));
     TabManager->RegisterTabSpawner(ExportTabID, FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeExportTab));
     TabManager->RegisterTabSpawner(TexturesTabID, FOnSpawnTab::CreateSP(this, &SSingleMemreportFileWindow::MakeTextureTab));
 
@@ -50,8 +52,10 @@ void SSingleMemreportFileWindow::Open()
         ->Split
         (
             FTabManager::NewStack()
+            ->AddTab(StatTabID, ETabState::OpenedTab)
             ->AddTab(ExportTabID, ETabState::OpenedTab)
             ->AddTab(TexturesTabID, ETabState::OpenedTab)
+            ->SetForegroundTab(StatTabID)
         )
     );
     
@@ -75,6 +79,12 @@ void SSingleMemreportFileWindow::Refresh() const
         TextureTab.Get()->SetTextureMemoryLists(MemreportFile.TextureMemories);
         TextureTab.Get()->SetTextureTotalStat(MemreportFile.TextureTotalStat);
     }
+}
+
+TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeStatTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+    return SNew(SStatTab)
+    .StatMemory(MemreportFile.StatMemory);
 }
 
 TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeTextureTab(const FSpawnTabArgs& SpawnTabArgs)
