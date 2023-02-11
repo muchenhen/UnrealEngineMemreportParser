@@ -7,6 +7,7 @@
 #include "SlateOptMacros.h"
 #include "Engine/AssetManager.h"
 #include "Framework/Styling/TextBlockWidgetStyle.h"
+#include "MemreportParser/Widgets/Chart/SBarGraphWidget.h"
 #include "Widgets/SCanvas.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -113,6 +114,30 @@ void SStatTab::Construct(const FArguments& InArgs)
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
                         ConstructFMallocBinned2Panel(StatMemory)
+                    ]
+                ]
+            ]
+
+            /*
+             * 最下面的部分
+             */
+            + SOverlay::Slot()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
+            .Padding(650,440,5,0)
+            [
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(MemreportTools::StringToSlateColor("111111"))
+                .Content()
+                [
+                    SNew(SBox)
+                    .WidthOverride(600)
+                    .HeightOverride(420)
+                    .Padding(FMargin(2.0f))
+                    .Clipping(EWidgetClipping::ClipToBounds)
+                    [
+                        SNew(SBarGraphWidget)
                     ]
                 ]
             ]
