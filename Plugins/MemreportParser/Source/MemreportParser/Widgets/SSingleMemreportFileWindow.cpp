@@ -55,7 +55,7 @@ void SSingleMemreportFileWindow::Open()
             ->AddTab(StatTabID, ETabState::OpenedTab)
             ->AddTab(ExportTabID, ETabState::OpenedTab)
             ->AddTab(TexturesTabID, ETabState::OpenedTab)
-            ->SetForegroundTab(StatTabID)
+            ->SetForegroundTab(TexturesTabID)
         )
     );
     
