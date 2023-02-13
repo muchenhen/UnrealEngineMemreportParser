@@ -8,6 +8,7 @@
 #include "Engine/AssetManager.h"
 #include "Framework/Styling/TextBlockWidgetStyle.h"
 #include "MemreportParser/Widgets/Chart/SBarGraphWidget.h"
+#include "MemreportParser/Widgets/Chart/SHistogramWidget.h"
 #include "Widgets/SCanvas.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -17,7 +18,14 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStatTab::Construct(const FArguments& InArgs)
 {
     StatMemory = InArgs._StatMemory;
-    
+    TArray<float> DataInput;
+    DataInput.Add(10);
+    DataInput.Add(20);
+    DataInput.Add(30);
+    DataInput.Add(40);
+    DataInput.Add(50);
+    DataInput.Add(60);
+    DataInput.Add(70);
     SDockTab::Construct(SDockTab::FArguments()
         .TabRole(ETabRole::NomadTab)
         
@@ -128,7 +136,7 @@ void SStatTab::Construct(const FArguments& InArgs)
             [
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
-                .BorderBackgroundColor(MemreportTools::StringToSlateColor("111111"))
+                .BorderBackgroundColor(FLinearColor::Black)
                 .Content()
                 [
                     SNew(SBox)
@@ -137,7 +145,10 @@ void SStatTab::Construct(const FArguments& InArgs)
                     .Padding(FMargin(2.0f))
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
-                        SNew(SBarGraphWidget)
+                        SNew(SHistogramWidget)
+                        .Width(600)
+                        .Height(200)
+                        .DataInput(DataInput)
                     ]
                 ]
             ]

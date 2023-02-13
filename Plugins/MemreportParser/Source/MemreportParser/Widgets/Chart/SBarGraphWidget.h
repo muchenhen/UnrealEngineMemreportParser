@@ -3,18 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SLeafWidget.h"
 
 /**
  * 
  */
-class MEMREPORTPARSER_API SBarGraphWidget : public SWidget
+class MEMREPORTPARSER_API SBarGraphWidget : public SLeafWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SBarGraphWidget)
-        {
-        }
-
+    SLATE_BEGIN_ARGS(SBarGraphWidget){}
+    SLATE_ARGUMENT(float, Value)
+    SLATE_ARGUMENT(float, Width)
+    SLATE_ARGUMENT(FLinearColor, Color)
+    SLATE_ARGUMENT(FString, TopText)
     SLATE_END_ARGS()
 
     /** Constructs this widget with InArgs */
@@ -29,6 +30,12 @@ public:
     virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
 
 public:
-    UPROPERTY()
+    // 柱状图高度
     float Value = 10.0f;
+    // 柱状图宽度
+    float Width = 10.0f;
+    // 柱状图颜色
+    FLinearColor Color = FLinearColor::Red;
+    // 柱子顶部的文字
+    FString TopText;
 };
