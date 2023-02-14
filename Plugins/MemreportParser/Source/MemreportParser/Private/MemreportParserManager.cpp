@@ -131,7 +131,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
         {
             StartStat = 1;
         }
-        else if (String.Contains(TEXT("Cached free OS pages:")) && EndStat == 0 && StartStat != 0)
+        else if (String.Contains(TEXT("AssetRegistry memory usage")) && EndStat == 0 && StartStat != 0)
         {
             EndStat = i;
         }
@@ -682,6 +682,75 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
             const FString SubStr2 = "mb";
             StatMemory.CachedFreeOSPages = GetMB(SubStr1, SubStr2);
             StatMemory.CachedFreeOSPages = StatMemory.CachedFreeOSPages.Replace(TEXT("m"), TEXT(""));
+        }
+
+        // FMemStack (gamethread) current size
+        if (String.Contains("FMemStack (gamethread) current size"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 1)
+            {
+                StatMemory.GameThreadCurrentSize = Strings[0];
+            }
+            continue;
+        }
+
+        // FPageAllocator (all threads) allocation size [used/ unused]
+        if (String.Contains("FPageAllocator (all threads) allocation size [used/ unused]"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 2)
+            {
+                StatMemory.ThreadPageAllocatorUsed = Strings[0];
+                StatMemory.ThreadPageAllocatorUnused = Strings[1];
+            }
+            continue;
+        }
+
+        // Nametable memory usage
+        if (String.Contains("Nametable memory usage"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 1)
+            {
+                StatMemory.NametableMemoryUsage = Strings[0];
+            }
+            continue;
+        }
+
+        // AssetRegistry memory usage
+        if (String.Contains("AssetRegistry memory usage"))
+        {
+            const FRegexPattern RegexPattern(FString(TEXT("[0-9.]+")));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            TArray<FString> Strings;
+            while (RegexMatcher.FindNext())
+            {
+                Strings.Add(RegexMatcher.GetCaptureGroup(0));
+            }
+            if (Strings.Num() >= 1)
+            {
+                StatMemory.AssetRegistryMemoryUsage = Strings[0];
+            }
+            continue;
         }
     }
     return StatMemory;

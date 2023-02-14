@@ -57,6 +57,17 @@ struct FStatMemory
     FString TotalAllocatedFromOS;
     // 缓存的空闲操作系统页面的大小
     FString CachedFreeOSPages;
+    // --Memory Stats
+    // 当前game thread内存栈的大小
+    FString GameThreadCurrentSize;
+    // 线程的页面分配器的分配大小，已使用
+    FString ThreadPageAllocatorUsed;
+    // 线程的页面分配器的分配大小，未使用
+    FString ThreadPageAllocatorUnused;
+    // 命名表内存使用情况
+    FString NametableMemoryUsage;
+    // 资产注册表内存使用情况
+    FString AssetRegistryMemoryUsage;
 };
 
 struct FObj
