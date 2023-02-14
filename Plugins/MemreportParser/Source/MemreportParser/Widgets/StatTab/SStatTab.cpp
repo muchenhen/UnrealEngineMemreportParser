@@ -18,14 +18,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStatTab::Construct(const FArguments& InArgs)
 {
     StatMemory = InArgs._StatMemory;
-    TArray<float> DataInput;
-    DataInput.Add(10);
-    DataInput.Add(20);
-    DataInput.Add(30);
-    DataInput.Add(40);
-    DataInput.Add(50);
-    DataInput.Add(60);
-    DataInput.Add(70);
+
     SDockTab::Construct(SDockTab::FArguments()
         .TabRole(ETabRole::NomadTab)
         
@@ -103,12 +96,12 @@ void SStatTab::Construct(const FArguments& InArgs)
             ]
 
             /*
-             * FMallocBinned2 Mem report的一堆东西 右上角部分
+             * FMallocBinned2 Mem report的一堆东西 右侧
              */
             + SOverlay::Slot()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Top)
-            .Padding(650,10,5,0)
+            .Padding(650,10,5,10)
             [
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
@@ -117,7 +110,7 @@ void SStatTab::Construct(const FArguments& InArgs)
                 [
                     SNew(SBox)
                     .WidthOverride(600)
-                    .HeightOverride(420)
+                    .HeightOverride(700)
                     .Padding(FMargin(2.0f))
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
@@ -127,12 +120,12 @@ void SStatTab::Construct(const FArguments& InArgs)
             ]
 
             /*
-             * 最下面的部分
+             * 左侧最下面的部分 Memory Stats:
              */
             + SOverlay::Slot()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Top)
-            .Padding(650,440,5,0)
+            .Padding(10,440,10,0)
             [
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
@@ -140,15 +133,12 @@ void SStatTab::Construct(const FArguments& InArgs)
                 .Content()
                 [
                     SNew(SBox)
-                    .WidthOverride(600)
-                    .HeightOverride(420)
+                    .WidthOverride(600.0f)
+                    .HeightOverride(270.0f)
                     .Padding(FMargin(2.0f))
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
-                        SNew(SHistogramWidget)
-                        .Width(600)
-                        .Height(200)
-                        .DataInput(DataInput)
+                        ConstructMemoryStatsPanel(StatMemory)
                     ]
                 ]
             ]
@@ -1057,6 +1047,106 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
         ]
     ;
     return MallocBinned2Panel;
+}
+
+TSharedRef<SWidget> SStatTab::ConstructMemoryStatsPanel(const FStatMemory& InFStatMemory)
+{
+    // 标题字体样式
+    const FTextBlockStyle HeaderTitleTextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 22))
+        .SetColorAndOpacity(FLinearColor::White);
+
+    // 内存具体大小的字体样式
+    const FTextBlockStyle TextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Light.ttf"), 14))
+        .SetColorAndOpacity(FLinearColor::White);
+
+    const FText FMemStackText = FText::Format(
+        LOCTEXT("FMemStackText", "FMemStack (gamethread) current size: {0} MB"),
+        FText::FromString(InFStatMemory.GameThreadCurrentSize));
+
+    const FText FPageAllocatorTextUsed = FText::Format(
+        LOCTEXT("FPageAllocatorTextUsedText", "FPageAllocator (all threads) allocation size\n\t\t used {0} MB,\n\t\t unused {1} MB"),
+        FText::FromString(InFStatMemory.ThreadPageAllocatorUsed),
+        FText::FromString(InFStatMemory.ThreadPageAllocatorUnused));
+
+    // NametableMemoryUsage
+    const FText NametableMemoryText = FText::Format(
+        LOCTEXT("NametableMemoryText", "Nametable memory usage: {0} MB"),
+        FText::FromString(InFStatMemory.NametableMemoryUsage));
+
+    // AssetRegistryMemoryUsage
+    const FText AssetRegistryMemoryUsageText = FText::Format(
+        LOCTEXT("AssetRegistryMemoryUsageText", "AssetRegistry memory usage: {0} MB"),
+        FText::FromString(InFStatMemory.AssetRegistryMemoryUsage));
+    
+    
+    auto MemoryStatsPanel =
+        SNew(SVerticalBox)
+
+        // Memory Stats
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Fill)
+        [
+            SNew(STextBlock)
+            .Clipping(EWidgetClipping::Inherit)
+            .Text(LOCTEXT("Memory Stats_LOC", "Memory Stats:"))
+            .TextStyle(&HeaderTitleTextBlockStyle)
+        ]
+
+        // FMemStack (gamethread) current size
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(FMemStackText)
+        ]
+
+        // FPageAllocator (all threads) allocation size [used/ unused]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(FPageAllocatorTextUsed)
+        ]
+
+        // Nametable memory usage
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(NametableMemoryText)
+        ]
+
+        // AssetRegistry memory usage
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(AssetRegistryMemoryUsageText)
+        ];
+
+    return MemoryStatsPanel;
 }
 
 FTextBlockStyle SStatTab::GetStatTextBlockStyle()

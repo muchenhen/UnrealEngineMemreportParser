@@ -144,10 +144,10 @@ int32 SHistogramWidget::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
     }
 
     // 柱子间隔固定为10
-    const float BarInterval = 10;
+    constexpr float BarInterval = 10;
 
     // 第一个柱子要和Y轴保持距离
-    const float FirstBarOffset = 25;
+    constexpr float FirstBarOffset = 35;
 
     // 柱子的宽度
     const float BarWidth = (DrawWidth - FirstBarOffset - BarInterval * (DataInput.Get().Num() - 1)) / DataInput.Get().Num();

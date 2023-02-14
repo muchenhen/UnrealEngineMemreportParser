@@ -33,6 +33,9 @@ public:
     // FMallocBinned2 Mem report 的显示区域
     TSharedRef<SWidget> ConstructFMallocBinned2Panel(const FStatMemory& InFStatMemory);
 
+    // Memory Stats的显示区域
+    TSharedRef<SWidget> ConstructMemoryStatsPanel(const FStatMemory& InFStatMemory);
+
 private:
 
     FStatMemory StatMemory;
