@@ -28,19 +28,15 @@ UE4 插件
 本项目使用JetBrains Rider进行开发，IDE License由JetBrains 开源项目申请提供
 
 <p>
-  <a href="https://www.jetbrains.com/">
-    <img src="jb_beam.png" style="max-width:25%;vertical-align: middle;"  alt="jb_beam"/>
-  </a>
-  <a href="https://www.jetbrains.com/rider/">
-    <img src="Rider.png" style="max-width:25%;vertical-align: middle;"  alt="Rider"/>
-  </a>
-  <a href="https://www.jetbrains.com/lp/rider-unreal/">
-    <img src="Rider_icon.png" style="max-width:25%;vertical-align: middle;"  alt="Rider_icon"/>
-  </a>
+<a href="https://www.jetbrains.com/"/>
+<img src ="jb_beam.png" align="middle" width=25%/>
+</a>
+<a href="https://www.jetbrains.com/rider/"/>
+<img src ="Rider.png" align="middle" width=25%/>
+</a>
+<a href="https://www.jetbrains.com/lp/rider-unreal/"/>
+<img src ="Rider_icon.png" align="middle" width=25%/>
+</a>
 </p>
 
-<span style="font-size: large; ">
-    <a href="https://www.jetbrains.com/lp/rider-unreal/">JetBrains 开源项目支持申请链接
-    </a>
-</span>
-
+<font size = 5> [**JetBrains 开源项目支持申请链接**](https://www.jetbrains.com/lp/rider-unreal/)</font>
