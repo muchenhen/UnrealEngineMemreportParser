@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MemreportStructs.h"
 
 /**
  * 
@@ -10,14 +11,31 @@
 class MEMREPORTPARSER_API SExportTab : public SDockTab
 {
 public:
-    SLATE_BEGIN_ARGS(SExportTab)
-        {
-        }
-
+    SLATE_BEGIN_ARGS(SExportTab){}
+    SLATE_ARGUMENT(FMemreportFile, MemreportFile)
     SLATE_END_ARGS()
     
     void Construct(const FArguments& InArgs);
 
+    // 第一列VerticalBox Class列
+    TSharedRef<SWidget> ConstructClassColumn(const FMemreportFile& InMemreportFile);
+
+    // 第二列VerticalBox Count列
+    TSharedRef<SWidget> ConstructCountColumn(const FMemreportFile& InMemreportFile);
+
+    // 第三列VerticalBox Num列
+    TSharedRef<SWidget> ConstructNumColumn(const FMemreportFile& InMemreportFile);
+
+    // 第四列VerticalBox Max列
+    TSharedRef<SWidget> ConstructMaxColumn(const FMemreportFile& InMemreportFile);
+
+    // 第五列VerticalBox ResExc列
+    TSharedRef<SWidget> ConstructResExcColumn(const FMemreportFile& InMemreportFile);
+
+    // 第六列VerticalBox Export列
+    TSharedRef<SWidget> ConstructExportColumn(const FMemreportFile& InMemreportFile);
+
+public:
     // 导出Obj List到csv文件
     FReply ExportObjectsCSV();
     
@@ -29,5 +47,8 @@ public:
 
     // 导出Textures到csv
     FReply ExportTexturesCSV();
+
+private:
+    FMemreportFile MemreportFile;
     
 };
