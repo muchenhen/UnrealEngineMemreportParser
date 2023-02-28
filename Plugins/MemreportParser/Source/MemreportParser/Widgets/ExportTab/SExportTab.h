@@ -20,16 +20,16 @@ public:
     // 第一列VerticalBox Class列
     TSharedRef<SWidget> ConstructClassColumn(const FMemreportFile& InMemreportFile);
 
-    // 第二列VerticalBox Count列
+    // 第二列VerticalBox Count列 数量
     TSharedRef<SWidget> ConstructCountColumn(const FMemreportFile& InMemreportFile);
 
-    // 第三列VerticalBox Num列
+    // 第三列VerticalBox Num列 NumKB 内存大小
     TSharedRef<SWidget> ConstructNumColumn(const FMemreportFile& InMemreportFile);
 
-    // 第四列VerticalBox Max列
+    // 第四列VerticalBox Max列 MaxKB
     TSharedRef<SWidget> ConstructMaxColumn(const FMemreportFile& InMemreportFile);
 
-    // 第五列VerticalBox ResExc列
+    // 第五列VerticalBox ResExc列 ResExcKB
     TSharedRef<SWidget> ConstructResExcColumn(const FMemreportFile& InMemreportFile);
 
     // 第六列VerticalBox Export列

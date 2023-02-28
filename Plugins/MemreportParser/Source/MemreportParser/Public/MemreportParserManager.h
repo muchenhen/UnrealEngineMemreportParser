@@ -98,7 +98,7 @@ public:
     static void ParticleSystemsParser(const TArray<FString>& StringArray, const int& StartParticleSystems, const int& EndParticleSystems, FMemreportFile& MemreportFile);
 
     // 解析Object List相关
-    static TArray<FObj> ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj);
+    static void ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj, FMemreportFile& FileData);
 
     // TODO：解析Objects SoundWave类型相关
 

@@ -372,7 +372,7 @@ struct FTextureTotalStat
     FString TotalSizeOnDisk;
     // 纹理的总数量
     FString Count;
-    // TODO：这是啥？
+    // 表示纹理的数量，不包括LODGroup为TEXTUREGROUP_World的纹理。
     FString CountApplicableToMin;
     // 每一个TextureGroup的统计信息
     TArray<FTextureGroupStat> TextureGroupStats;
@@ -435,6 +435,7 @@ struct FMemreportFile
 {
     FStatMemory StatMemory;
     TArray<FObj> ObjectList;
+    FObjectsStat ObjectsStat;
     TArray<FSpawnedActor> SpawnedActors;
     TArray<FParticleDynamicMemory> ParticleDynamicMemories;
     TArray<FConfigCache> ConfigCaches;

@@ -292,8 +292,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartObj != 0 && EndObj != 0)
     {
-        const TArray<FObj> ObjectList = ObjParser(StringArray, StartObj, EndObj);
-        FileData.ObjectList = ObjectList;
+        ObjParser(StringArray, StartObj, EndObj, FileData);
     }
 
     if (StartRHI != 0 && EndRHI != 0)
@@ -846,7 +845,7 @@ TArray<FLevels> UMemreportParserManager::LevelsParser(const TArray<FString>& Str
     return Levels;
 }
 
-TArray<FObj> UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj)
+void UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj, FMemreportFile& FileData)
 {
     bool bStart = false;
     TArray<FObj> ObjectList;
@@ -883,10 +882,11 @@ TArray<FObj> UMemreportParserManager::ObjParser(const TArray<FString>& StringArr
         {
             AlphasortObjectsStat = ObjectsStatParser(String);
             AlphasortObjectsStat.Print();
+            FileData.ObjectsStat = AlphasortObjectsStat;
         }
     }
     UE_LOG(LogMemreportParser, Display, TEXT("Objects Num: %d"), ObjectList.Num());
-    return ObjectList;
+    FileData.ObjectList = ObjectList;
 }
 
 TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh)
