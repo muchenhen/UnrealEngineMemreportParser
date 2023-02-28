@@ -68,6 +68,14 @@ void SExportTab::Construct(const FArguments& InArgs)
                 [
                     ConstructCountColumn(MemreportFile)
                 ]
+
+                + SHorizontalBox::Slot()
+                  .FillWidth(1.0f)
+                  .HAlign(HAlign_Fill)
+                  .VAlign(VAlign_Fill)
+                [
+                    ConstructNumColumn(MemreportFile)
+                ]
             ]
         ]);
 }
@@ -189,7 +197,7 @@ TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMem
     const FText SkeletalMeshCount = FText::FromString(FString::FromInt(InMemreportFile.SkeletalMeshObjects.Num()));
     const FText StaticMeshCount = FText::FromString(FString::FromInt(InMemreportFile.StaticMeshObjects.Num()));
     const FText StaticMeshComponentCount = FText::FromString(FString::FromInt(InMemreportFile.StaticMeshComponentObjects.Num()));
-    
+
     auto CountColumn =
         SNew(SVerticalBox)
 
@@ -298,7 +306,118 @@ TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMem
 TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemreportFile)
 {
     const FText ObjectsNum = FText::FromString(InMemreportFile.ObjectsStat.Num);
-    return SNew(SVerticalBox);
+    // SpawnedActors并没有内存信息
+    const FText SpawnedActorsNum = FText();
+    const FText ConfigCacheNum = FText::FromString(InMemreportFile.GetConfigCacheMemNum());
+    const FText TexturesNum = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeInMem);
+    const FText ParticleSystemsNum = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
+    const FText SkeletalMeshNum = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Num);
+    const FText StaticMeshNum = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Num);
+    const FText StaticMeshComponentNum = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Num);
+
+    auto NumColumn =
+        SNew(SVerticalBox)
+
+        // Num
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("Num_Loc", "Num"))
+            .TextStyle(&TitleTextBlockStyle)
+        ]
+
+        // Objects
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ObjectsNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SpawnedActors
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SpawnedActorsNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ConfigCache
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ConfigCacheNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // Textures
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(TexturesNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ParticleSystems
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ParticleSystemsNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SkeletalMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SkeletalMeshNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMeshComponent
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshComponentNum)
+            .TextStyle(&NormalTextBlockStyle)
+        ];
+
+    return NumColumn;
 }
 
 TSharedRef<SWidget> SExportTab::ConstructMaxColumn(const FMemreportFile& InMemreportFile)

@@ -343,14 +343,12 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartSkeletalMesh != 0 && EndSkeletalMesh != 0)
     {
-        const TArray<FObjClass> SkeletalMeshObjects = SkeletalMeshParser(StringArray, StartSkeletalMesh, EndSkeletalMesh);
-        FileData.SkeletalMeshObjects = SkeletalMeshObjects;
+        SkeletalMeshParser(StringArray, StartSkeletalMesh, EndSkeletalMesh, FileData);
     }
 
     if (StartStaticMesh != 0 && EndStaticMesh != 0)
     {
-        const TArray<FObjClass> StaticMeshObjects = StaticMeshParser(StringArray, StartStaticMesh, EndStaticMesh);
-        FileData.StaticMeshObjects = StaticMeshObjects;
+        StaticMeshParser(StringArray, StartStaticMesh, EndStaticMesh, FileData);
     }
 
     if (StartLevel != 0 && EndLevel != 0)
@@ -361,8 +359,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartStaticMeshComponent != 0 && EndStaticMeshComponent != 0)
     {
-        const TArray<FObjClass> StaticMeshComponentObjects = StaticMeshComponentParser(StringArray, StartStaticMeshComponent, EndStaticMeshComponent);
-        FileData.StaticMeshComponentObjects = StaticMeshComponentObjects;
+        StaticMeshComponentParser(StringArray, StartStaticMeshComponent, EndStaticMeshComponent, FileData);
     }
 
     return FileData;
@@ -889,7 +886,7 @@ void UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, cons
     FileData.ObjectList = ObjectList;
 }
 
-TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh)
+void UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh, FMemreportFile& FileData)
 {
     TArray<FObjClass> SkeletalMeshObjects;
     for (int i = StartSkeletalMesh; i <= EndSkeletalMesh; i++)
@@ -919,6 +916,7 @@ TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FStri
         {
             SkeletalMeshObjectsStat = ObjectsStatParser(String);
             SkeletalMeshObjectsStat.Print();
+            FileData.SkeletalMeshObjectsStat = SkeletalMeshObjectsStat;
         }
         else if (!String.IsEmpty() && EndSkeletalMesh - i < 5)
         {
@@ -926,10 +924,10 @@ TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FStri
         }
     }
     UE_LOG(LogMemreportParser, Display, TEXT("SkeletalMesh Objects Num: %d"), SkeletalMeshObjects.Num());
-    return SkeletalMeshObjects;
+    FileData.SkeletalMeshObjects = SkeletalMeshObjects;
 }
 
-TArray<FObjClass> UMemreportParserManager::StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh)
+void UMemreportParserManager::StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh, FMemreportFile& FileData)
 {
     TArray<FObjClass> StaticMeshList;
     for (int i = StartStaticMesh; i <= EndStaticMesh; i++)
@@ -959,6 +957,7 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshParser(const TArray<FString
         {
             StaticMeshObjectsStat = ObjectsStatParser(String);
             StaticMeshObjectsStat.Print();
+            FileData.StaticMeshObjectsStat = StaticMeshObjectsStat;
         }
         else if (!String.IsEmpty() && EndStaticMesh - i < 5)
         {
@@ -966,7 +965,7 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshParser(const TArray<FString
         }
     }
     UE_LOG(LogMemreportParser, Display, TEXT("StaticMesh Objects Num: %d"), StaticMeshList.Num());
-    return StaticMeshList;
+    FileData.StaticMeshObjects = StaticMeshList;
 }
 
 TArray<FObjClass> UMemreportParserManager::LevelObjectParser(const TArray<FString>& StringArray, const int& StartLevel, const int& EndLevel)
@@ -1009,7 +1008,7 @@ TArray<FObjClass> UMemreportParserManager::LevelObjectParser(const TArray<FStrin
     return LevelList;
 }
 
-TArray<FObjClass> UMemreportParserManager::StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent)
+void UMemreportParserManager::StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent, FMemreportFile& FileData)
 {
     TArray<FObjClass> StaticMeshComponentList;
     for (int i = StartStaticMeshComponent; i <= EndStaticMeshComponent; i++)
@@ -1039,6 +1038,7 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshComponentParser(const TArra
         {
             StaticMeshComponentObjectsStat = ObjectsStatParser(String);
             StaticMeshComponentObjectsStat.Print();
+            FileData.StaticMeshComponentObjectsStat = StaticMeshComponentObjectsStat;
         }
         else if (!String.IsEmpty() && EndStaticMeshComponent - i < 5)
         {
@@ -1046,7 +1046,7 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshComponentParser(const TArra
         }
     }
     UE_LOG(LogMemreportParser, Display, TEXT("StaticMeshComponent Objects Num: %d"), StaticMeshComponentList.Num());
-    return StaticMeshComponentList;
+    FileData.StaticMeshComponentObjects = StaticMeshComponentList;
 }
 
 TArray<FSpawnedActor> UMemreportParserManager::SpawnedActorsParser(const TArray<FString>& StringArray, const int& StartActors, const int& EndActors)

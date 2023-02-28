@@ -419,12 +419,19 @@ struct FParticleSystem
 struct FParticleSystemsTotal
 {
     FString Name;
+    // 内存占用大小
     FString Size;
+    // TODO: 这个是什么
     FString PSysSize;
+    // TODO: 这个是什么
     FString ModuleSize;
+    // 组件的大小
     FString ComponentSize;
+    // 组件的数量
     FString ComponentCount;
+    // 组件的资源大小
     FString ComponentResourceSize;
+    // 组件的真实资源大小，运行时的大小
     FString ComponentTrueResourceSize;
 };
 
@@ -442,23 +449,22 @@ struct FMemreportFile
     TArray<FTextureMemory> TextureMemories;
     FTextureTotalStat TextureTotalStat;
     TArray<FObjClass> SkeletalMeshObjects;
+    FObjectsStat SkeletalMeshObjectsStat;
     TArray<FObjClass> StaticMeshObjects;
+    FObjectsStat StaticMeshObjectsStat;
     TArray<FObjClass> LevelObjects;
     TArray<FObjClass> StaticMeshComponentObjects;
+    FObjectsStat StaticMeshComponentObjectsStat;
     TArray<FLevels> Levels;
     TArray<FRHIResourceMemory> RHIResourceMemories;
     TArray<FParticleSystem> ParticleSystems;
     FParticleSystemsTotal ParticleSystemsTotal;
 
-    bool IsValid() const
-    {
-        if (StatMemory.Platform == "")
-        {
-            UE_LOG(LogTemp, Error, TEXT("StatMemory.Platform is empty, %s"), *StatMemory.Platform);
-            return false;
-        }
-        return true;
-    }
+    bool IsValid() const;
+
+    FString GetConfigCacheMemNum() const;
+
+    // FString GetParticleSystems
 };
 
 struct FMemreportViewModel

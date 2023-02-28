@@ -105,7 +105,8 @@ TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeTextureTab(const FSpawnTabA
 
 TSharedRef<SDockTab> SSingleMemreportFileWindow::MakeExportTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-    return SNew(SExportTab);
+    return SNew(SExportTab)
+    .MemreportFile(MemreportFile);
 }
 
 #undef LOCTEXT_NAMESPACE
