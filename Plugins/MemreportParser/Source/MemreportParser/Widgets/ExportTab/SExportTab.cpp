@@ -25,7 +25,7 @@ FReply SExportTab::ExportObjectsCSV()
     return FReply::Handled();
 }
 
-FReply SExportTab::ExportActorsCSV()
+FReply SExportTab::ExportSpawnedActorsCSV()
 {
     UMemreportParserManager::SaveSpawnedActorsToCSV();
     return FReply::Handled();
@@ -40,6 +40,30 @@ FReply SExportTab::ExportConfigCacheCSV()
 FReply SExportTab::ExportTexturesCSV()
 {
     UMemreportParserManager::SaveTexturesToCSV();
+    return FReply::Handled();
+}
+
+FReply SExportTab::ExportParticleSystemsCSV()
+{
+    UMemreportParserManager::SaveParticleSystemsToCSV();
+    return FReply::Handled();
+}
+
+FReply SExportTab::ExportSkeletalMeshesCSV()
+{
+    UMemreportParserManager::SaveSkeletalMeshesToCSV();
+    return FReply::Handled();
+}
+
+FReply SExportTab::ExportStaticMeshesCSV()
+{
+    UMemreportParserManager::SaveStaticMeshesToCSV();
+    return FReply::Handled();
+}
+
+FReply SExportTab::ExportStaticMeshComponentsCSV()
+{
+    UMemreportParserManager::SaveStaticMeshComponentsToCSV();
     return FReply::Handled();
 }
 
@@ -75,6 +99,30 @@ void SExportTab::Construct(const FArguments& InArgs)
                   .VAlign(VAlign_Fill)
                 [
                     ConstructNumColumn(MemreportFile)
+                ]
+
+                + SHorizontalBox::Slot()
+                  .FillWidth(1.0f)
+                  .HAlign(HAlign_Fill)
+                  .VAlign(VAlign_Fill)
+                [
+                    ConstructMaxColumn(MemreportFile)
+                ]
+
+                + SHorizontalBox::Slot()
+                  .FillWidth(1.0f)
+                  .HAlign(HAlign_Fill)
+                  .VAlign(VAlign_Fill)
+                [
+                    ConstructResExcColumn(MemreportFile)
+                ]
+
+                + SHorizontalBox::Slot()
+                  .FillWidth(1.0f)
+                  .HAlign(HAlign_Fill)
+                  .VAlign(VAlign_Fill)
+                [
+                    ConstructExportColumn(MemreportFile)
                 ]
             ]
         ]);
@@ -422,17 +470,356 @@ TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemre
 
 TSharedRef<SWidget> SExportTab::ConstructMaxColumn(const FMemreportFile& InMemreportFile)
 {
-    return SNew(SVerticalBox);
+    const FText ObjectsMax = FText::FromString(InMemreportFile.ObjectsStat.Max);
+    // Spawned Actors并没有内存信息
+    const FText SpawnedActorsMax = FText();
+    const FText ConfigCacheMax = FText::FromString(InMemreportFile.GetConfigCacheMaxMemNum());
+    // TODO:这里的Max应该不是TotalSizeOnDisk，毕竟也许并没有全部加载进来，而这里展示的信息应该是内存实际占用的峰值
+    const FText TexturesMax = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeOnDisk);
+    // TODO:这个应该也不对
+    const FText ParticleSystemsMax = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
+    const FText SkeletalMeshMax = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Max);
+    const FText StaticMeshMax = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Max);
+    const FText StaticMeshComponentMax = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Max);
+
+    auto MaxColumn =
+        SNew(SVerticalBox)
+
+        // Max
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("Max_Loc", "Max"))
+            .TextStyle(&TitleTextBlockStyle)
+        ]
+
+        // Objects
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ObjectsMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SpawnedActors
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SpawnedActorsMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ConfigCache
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ConfigCacheMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // Textures
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(TexturesMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ParticleSystems
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ParticleSystemsMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SkeletalMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SkeletalMeshMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMeshComponent
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshComponentMax)
+            .TextStyle(&NormalTextBlockStyle)
+        ];
+
+    return MaxColumn;
 }
 
 TSharedRef<SWidget> SExportTab::ConstructResExcColumn(const FMemreportFile& InMemreportFile)
 {
-    return SNew(SVerticalBox);
+    const FText ObjectsResExc = FText::FromString(InMemreportFile.ObjectsStat.ResExc);
+    // Spawned Actors并没有内存信息
+    const FText SpawnedActorsResExc = FText();
+    // ConfigCache没有此内存信息
+    const FText ConfigCacheResExc = FText();
+    // Textures没有此内存信息
+    const FText TexturesResExc = FText();
+    // ParticleSystems没有此内存信息
+    const FText ParticleSystemsResExc = FText();
+    const FText SkeletalMeshResExc = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.ResExc);
+    const FText StaticMeshResExc = FText::FromString(InMemreportFile.StaticMeshObjectsStat.ResExc);
+    const FText StaticMeshComponentResExc = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.ResExc);
+
+    auto ResExcColumn =
+        SNew(SVerticalBox)
+
+        // ResExc
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("ResExc_Loc", "ResExc"))
+            .TextStyle(&TitleTextBlockStyle)
+        ]
+
+        // Objects
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ObjectsResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SpawnedActors
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SpawnedActorsResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ConfigCache
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ConfigCacheResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // Textures
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(TexturesResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // ParticleSystems
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(ParticleSystemsResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // SkeletalMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(SkeletalMeshResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMesh
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ]
+
+        // StaticMeshComponent
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(StaticMeshComponentResExc)
+            .TextStyle(&NormalTextBlockStyle)
+        ];
+
+    return ResExcColumn;
 }
 
 TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMemreportFile)
 {
-    return SNew(SVerticalBox);
+    auto ExportButtonColumn =
+        SNew(SVerticalBox)
+
+        // Export
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Left)
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("Export_Loc", "Export"))
+            .TextStyle(&TitleTextBlockStyle)
+        ]
+
+        // Objects Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportObjects_Loc", "Export Objects CSV"))
+            .OnClicked(this, &SExportTab::ExportObjectsCSV)
+        ]
+
+        // SpawnedActors Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportSpawnedActors_Loc", "Export SpawnedActors CSV"))
+            .OnClicked(this, &SExportTab::ExportSpawnedActorsCSV)
+        ]
+
+        // ConfigCache Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportConfigCache_Loc", "Export ConfigCache CSV"))
+            .OnClicked(this, &SExportTab::ExportConfigCacheCSV)
+        ]
+
+        // Textures Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportTextures_Loc", "Export Textures CSV"))
+            .OnClicked(this, &SExportTab::ExportTexturesCSV)
+        ]
+
+        // ParticleSystems Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportParticleSystems_Loc", "Export ParticleSystems CSV"))
+            .OnClicked(this, &SExportTab::ExportParticleSystemsCSV)
+        ]
+
+        // SkeletalMesh Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportSkeletalMesh_Loc", "Export SkeletalMesh CSV"))
+            .OnClicked(this, &SExportTab::ExportSkeletalMeshesCSV)
+        ]
+
+        // StaticMesh Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportStaticMesh_Loc", "Export StaticMesh CSV"))
+            .OnClicked(this, &SExportTab::ExportStaticMeshesCSV)
+        ]
+
+        // StaticMeshComponent Export Button
+        + SVerticalBox::Slot()
+          .FillHeight(1)
+          .VAlign(VAlign_Fill)
+          .HAlign(HAlign_Fill)
+          .Padding(10, 10)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("ExportStaticMeshComponent_Loc", "Export StaticMeshComponent CSV"))
+            .OnClicked(this, &SExportTab::ExportStaticMeshComponentsCSV)
+        ];
+
+    return ExportButtonColumn;
 }
 
 #undef LOCTEXT_NAMESPACE

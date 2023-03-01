@@ -164,7 +164,8 @@ struct FObjectsStat
     FString Num;
     FString Total;
     FString Max;
-    FString Res;
+    // 表示该类型的对象在保留时，额外占用的内存大小，单位是KB
+    FString ResExc;
     FString ResDedSys;
     FString ResShrSys;
     FString ResDedVid;
@@ -176,7 +177,7 @@ struct FObjectsStat
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Num: %s"), *Num);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat             Total: %s"), *Total);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Max: %s"), *Max);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Res: %s"), *Res);
+        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat            ResExc: %s"), *ResExc);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedSys: %s"), *ResDedSys);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResShrSys: %s"), *ResShrSys);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedVid: %s"), *ResDedVid);
@@ -189,7 +190,7 @@ struct FObjectsStat
         Num.Empty();
         Total.Empty();
         Max.Empty();
-        Res.Empty();
+        ResExc.Empty();
         ResDedSys.Empty();
         ResShrSys.Empty();
         ResDedVid.Empty();
@@ -463,7 +464,7 @@ struct FMemreportFile
     bool IsValid() const;
 
     FString GetConfigCacheMemNum() const;
-
+    FString GetConfigCacheMaxMemNum() const;
     // FString GetParticleSystems
 };
 

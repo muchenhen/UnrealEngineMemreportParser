@@ -40,7 +40,7 @@ public:
     FReply ExportObjectsCSV();
     
     // 导出SpawnActors List到csv
-    FReply ExportActorsCSV();
+    FReply ExportSpawnedActorsCSV();
     
     // 导出ConfigCache信息到csv
     FReply ExportConfigCacheCSV();
@@ -48,7 +48,18 @@ public:
     // 导出Textures到csv
     FReply ExportTexturesCSV();
 
+    // 导出ParticleSystems到csv
+    FReply ExportParticleSystemsCSV();
+
+    // 导出SkeletalMeshes到csv
+    FReply ExportSkeletalMeshesCSV();
+
+    // 导出StaticMeshes到csv
+    FReply ExportStaticMeshesCSV();
+
+    // 导出StaticMeshComponents到csv
+    FReply ExportStaticMeshComponentsCSV();
+
 private:
     FMemreportFile MemreportFile;
-    
 };

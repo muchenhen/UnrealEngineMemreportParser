@@ -138,4 +138,16 @@ public: // 以下是一些导出文件相关的函数
 
     // 输出所有的Texture信息到CSV文件
     static void SaveTexturesToCSV();
+
+    // 输出所有的ParticleSystems信息到CSV文件
+    static void SaveParticleSystemsToCSV();
+
+    // 输出所有的SkeletalMesh信息到CSV文件
+    static void SaveSkeletalMeshesToCSV();
+
+    // 输出所有的StaticMesh信息到CSV文件
+    static void SaveStaticMeshesToCSV();
+
+    // 输出所有的StaticMeshComponent信息到CSV文件
+    static void SaveStaticMeshComponentsToCSV();
 };

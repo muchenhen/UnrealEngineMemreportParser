@@ -21,3 +21,15 @@ FString FMemreportFile::GetConfigCacheMemNum() const
     Total /= 1024;
     return FString::FromInt(Total);
 }
+
+FString FMemreportFile::GetConfigCacheMaxMemNum() const
+{
+    int32 Total = 0;
+    for (const FConfigCache& ConfigCache : ConfigCaches)
+    {
+        Total += FCString::Atoi(*ConfigCache.MaxBytes);
+    }
+    // bytes to kb
+    Total /= 1024;
+    return FString::FromInt(Total);
+}

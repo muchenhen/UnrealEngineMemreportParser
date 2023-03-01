@@ -1402,9 +1402,9 @@ FObjectsStat UMemreportParserManager::ObjectsStatParser(const FString& String)
             {
                 ObjectsStat.Max = OutStrings[1].Replace(TEXT("M"), TEXT(""));
             }
-            else if (OutStrings[0] == TEXT("Res"))
+            else if (OutStrings[0] == TEXT("ResExc"))
             {
-                ObjectsStat.Res = OutStrings[1].Replace(TEXT("M"), TEXT(""));
+                ObjectsStat.ResExc = OutStrings[1].Replace(TEXT("M"), TEXT(""));
             }
             else if (OutStrings[0] == TEXT("ResDedSys"))
             {
@@ -1600,6 +1600,22 @@ void UMemreportParserManager::SaveTexturesToCSV()
     {
         UE_LOG(LogMemreportParser, Error, TEXT("Save Texture to CSV Failed"));
     }
+}
+
+void UMemreportParserManager::SaveParticleSystemsToCSV()
+{
+}
+
+void UMemreportParserManager::SaveSkeletalMeshesToCSV()
+{
+}
+
+void UMemreportParserManager::SaveStaticMeshesToCSV()
+{
+}
+
+void UMemreportParserManager::SaveStaticMeshComponentsToCSV()
+{
 }
 
 #undef LOCTEXT_NAMESPACE
