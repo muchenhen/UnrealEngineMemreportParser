@@ -6,18 +6,31 @@
 
 #include "MemreportParserManager.h"
 #include "SlateOptMacros.h"
+#include "Brushes/SlateBoxBrush.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 #define LOCTEXT_NAMESPACE "SExportTab"
+#define BOX_CORE_BRUSH( RelativePath, ... ) FSlateBoxBrush( FPaths::EngineContentDir() / "Editor/Slate" / RelativePath + TEXT(".png"), __VA_ARGS__ )
 
-static FTextBlockStyle TitleTextBlockStyle = FTextBlockStyle()
-                                             .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 40))
-                                             .SetColorAndOpacity(FLinearColor::White);
 
-static FTextBlockStyle NormalTextBlockStyle = FTextBlockStyle()
-                                              .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 14))
-                                              .SetColorAndOpacity(FLinearColor::White);
+static FTextBlockStyle TitleTextBlockStyle =
+    FTextBlockStyle()
+    .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 40))
+    .SetColorAndOpacity(FLinearColor::White);
+
+static FTextBlockStyle NormalTextBlockStyle =
+    FTextBlockStyle()
+    .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 14))
+    .SetColorAndOpacity(FLinearColor::White);
+
+static FButtonStyle ExportButtonStyle =
+    FButtonStyle()
+    .SetNormal(BOX_CORE_BRUSH("Common/Button", FVector2D(32, 32), 8.0f / 32.0f))
+    .SetHovered(BOX_CORE_BRUSH("Common/Button_Hovered", FVector2D(32, 32), 8.0f / 32.0f))
+    .SetPressed(BOX_CORE_BRUSH("Common/Button_Pressed", FVector2D(32, 32), 8.0f / 32.0f))
+    .SetNormalPadding(FMargin(30,20))
+    .SetPressedPadding(FMargin(30,20));
 
 FReply SExportTab::ExportObjectsCSV()
 {
@@ -98,7 +111,7 @@ void SExportTab::Construct(const FArguments& InArgs)
                   .HAlign(HAlign_Fill)
                   .VAlign(VAlign_Fill)
                 [
-                    ConstructNumColumn(MemreportFile)
+                    ConstructTotalColumn(MemreportFile)
                 ]
 
                 + SHorizontalBox::Slot()
@@ -238,7 +251,7 @@ TSharedRef<SWidget> SExportTab::ConstructClassColumn(const FMemreportFile& InMem
 TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMemreportFile)
 {
     // 数量信息
-    
+
     // Objects的数量
     const FText ObjectsCount = FText::FromString(InMemreportFile.ObjectsStat.Count);
     // SpawnedActors的数量
@@ -361,19 +374,28 @@ TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMem
     return CountColumn;
 }
 
-TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemreportFile)
+TSharedRef<SWidget> SExportTab::ConstructTotalColumn(const FMemreportFile& InMemreportFile)
 {
-    const FText ObjectsNum = FText::FromString(InMemreportFile.ObjectsStat.Count);
+    // 这里表示的是某类型的内存占用总的大小
+
+    // 所有Objects的内存大小 原始单位是MB
+    const FText ObjectsNum = FText::FromString(InMemreportFile.ObjectsStat.Total + " MB");
     // SpawnedActors并没有内存信息
     const FText SpawnedActorsNum = FText();
-    const FText ConfigCacheNum = FText::FromString(InMemreportFile.GetConfigCacheMemNum());
-    const FText TexturesNum = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeInMem);
-    const FText ParticleSystemsNum = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
-    const FText SkeletalMeshNum = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Count);
-    const FText StaticMeshNum = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Count);
-    const FText StaticMeshComponentNum = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Count);
+    // ConfigCache的内存大小 原始单位是byte
+    const FText ConfigCacheNum = FText::FromString(InMemreportFile.GetConfigCacheMemNumInKB() + " KB");
+    // Textures的内存大小 原始单位是MB
+    const FText TexturesNum = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeInMem + " MB");
+    // ParticleSystems的内存大小 原始单位是byte
+    const FText ParticleSystemsNum = FText::FromString(InMemreportFile.ParticleSystemsTotal.GetSizeInKB() + " KB");
+    // SkeletalMesh的内存大小 原始单位是MB
+    const FText SkeletalMeshNum = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Total + " MB");
+    // StaticMesh的内存大小 原始单位是MB
+    const FText StaticMeshNum = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Total + " MB");
+    // StaticMeshComponent的内存大小 原始单位是MB
+    const FText StaticMeshComponentNum = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Total + " MB");
 
-    auto NumColumn =
+    auto TotalColumn =
         SNew(SVerticalBox)
 
         // Count
@@ -383,7 +405,7 @@ TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemre
           .HAlign(HAlign_Left)
         [
             SNew(STextBlock)
-            .Text(LOCTEXT("Num_Loc", "Count"))
+            .Text(LOCTEXT("Total_Loc", "Total"))
             .TextStyle(&TitleTextBlockStyle)
         ]
 
@@ -475,21 +497,30 @@ TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemre
             .TextStyle(&NormalTextBlockStyle)
         ];
 
-    return NumColumn;
+    return TotalColumn;
 }
 
 TSharedRef<SWidget> SExportTab::ConstructMaxColumn(const FMemreportFile& InMemreportFile)
 {
+    // 以下是某类型的内存占用的峰值
+
+    // Objects的内存峰值 原始单位是MB
     const FText ObjectsMax = FText::FromString(InMemreportFile.ObjectsStat.Max);
     // Spawned Actors并没有内存信息
     const FText SpawnedActorsMax = FText();
-    const FText ConfigCacheMax = FText::FromString(InMemreportFile.GetConfigCacheMaxMemNum());
-    // TODO:这里的Max应该不是TotalSizeOnDisk，毕竟也许并没有全部加载进来，而这里展示的信息应该是内存实际占用的峰值
+    // ConfigCache的内存峰值 原始单位是byte
+    const FText ConfigCacheMax = FText::FromString(InMemreportFile.GetConfigCacheMaxMemNumInKB());
+    // TODO: 这里的Max应该不是TotalSizeOnDisk，毕竟也许并没有全部加载进来，而这里展示的信息应该是内存实际占用的峰值
     const FText TexturesMax = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeOnDisk);
-    // TODO:这个应该也不对
-    const FText ParticleSystemsMax = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
+    // TODO: 这个应该也不对
+    // const FText ParticleSystemsMax = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
+    // 由于不清楚ParticleSystems的Max是什么，所以暂时不显示
+    const FText ParticleSystemsMax = FText();
+    // SkeletalMesh的内存峰值 原始单位是MB
     const FText SkeletalMeshMax = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Max);
+    // StaticMesh的内存峰值 原始单位是MB
     const FText StaticMeshMax = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Max);
+    // StaticMeshComponent的内存峰值 原始单位是MB
     const FText StaticMeshComponentMax = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Max);
 
     auto MaxColumn =
@@ -741,8 +772,14 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
-            .Text(LOCTEXT("ExportObjects_Loc", "Export Objects CSV"))
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .OnClicked(this, &SExportTab::ExportObjectsCSV)
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("ExportObjects_Loc", "Export Objects CSV"))
+            ]
         ]
 
         // SpawnedActors Export Button
@@ -753,6 +790,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportSpawnedActors_Loc", "Export SpawnedActors CSV"))
             .OnClicked(this, &SExportTab::ExportSpawnedActorsCSV)
         ]
@@ -765,6 +805,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportConfigCache_Loc", "Export ConfigCache CSV"))
             .OnClicked(this, &SExportTab::ExportConfigCacheCSV)
         ]
@@ -777,6 +820,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportTextures_Loc", "Export Textures CSV"))
             .OnClicked(this, &SExportTab::ExportTexturesCSV)
         ]
@@ -789,6 +835,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportParticleSystems_Loc", "Export ParticleSystems CSV"))
             .OnClicked(this, &SExportTab::ExportParticleSystemsCSV)
         ]
@@ -801,6 +850,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportSkeletalMesh_Loc", "Export SkeletalMesh CSV"))
             .OnClicked(this, &SExportTab::ExportSkeletalMeshesCSV)
         ]
@@ -813,6 +865,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportStaticMesh_Loc", "Export StaticMesh CSV"))
             .OnClicked(this, &SExportTab::ExportStaticMeshesCSV)
         ]
@@ -825,6 +880,9 @@ TSharedRef<SWidget> SExportTab::ConstructExportColumn(const FMemreportFile& InMe
           .Padding(10, 10)
         [
             SNew(SButton)
+            .HAlign(HAlign_Fill)
+            .VAlign(VAlign_Fill)
+            .ButtonStyle(&ExportButtonStyle)
             .Text(LOCTEXT("ExportStaticMeshComponent_Loc", "Export StaticMeshComponent CSV"))
             .OnClicked(this, &SExportTab::ExportStaticMeshComponentsCSV)
         ];

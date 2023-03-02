@@ -1471,6 +1471,18 @@ FString UMemreportParserManager::GetCSVFileName(const FString& OriFileName, ECSV
     case Texture:
         FileName += TEXT("-Texture");
         break;
+    case ParticleSystems:
+        FileName += TEXT("-ParticleSystems");
+        break;
+    case SkeletalMeshes:
+        FileName += TEXT("-SkeletalMeshes");
+        break;
+    case StaticMeshes:
+        FileName += TEXT("-StaticMeshes");
+        break;
+    case StaticMeshComponents:
+        FileName += TEXT("-StaticMeshComponents");
+        break;
     default:
         break;
     }
@@ -1604,18 +1616,102 @@ void UMemreportParserManager::SaveTexturesToCSV()
 
 void UMemreportParserManager::SaveParticleSystemsToCSV()
 {
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FParticleSystem> ParticleSystems = FilesData[CurrentFileName].ParticleSystems;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::ParticleSystems);
+    
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FParticleSystem::GetHeader()));
+    for (auto& ParticleSystem : ParticleSystems)
+    {
+        OutStrings.Add(TransFStringArrayToFString(ParticleSystem.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save ParticleSystems to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save ParticleSystems to CSV Failed"));
+    }
 }
 
 void UMemreportParserManager::SaveSkeletalMeshesToCSV()
 {
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> SkeletalMeshes = FilesData[CurrentFileName].SkeletalMeshObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::SkeletalMeshes);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& SkeletalMesh : SkeletalMeshes)
+    {
+        OutStrings.Add(TransFStringArrayToFString(SkeletalMesh.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save SkeletalMeshes to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save SkeletalMeshes to CSV Failed"));
+    }
 }
 
 void UMemreportParserManager::SaveStaticMeshesToCSV()
 {
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> StaticMeshes = FilesData[CurrentFileName].StaticMeshObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshes);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& StaticMesh : StaticMeshes)
+    {
+        OutStrings.Add(TransFStringArrayToFString(StaticMesh.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save StaticMeshes to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save StaticMeshes to CSV Failed"));
+    }
 }
 
 void UMemreportParserManager::SaveStaticMeshComponentsToCSV()
 {
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> StaticMeshComponents = FilesData[CurrentFileName].StaticMeshComponentObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshComponents);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& StaticMeshComponent : StaticMeshComponents)
+    {
+        OutStrings.Add(TransFStringArrayToFString(StaticMeshComponent.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save StaticMeshComponents to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save StaticMeshComponents to CSV Failed"));
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

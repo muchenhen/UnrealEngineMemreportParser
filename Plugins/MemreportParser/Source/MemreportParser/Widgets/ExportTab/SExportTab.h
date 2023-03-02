@@ -24,7 +24,7 @@ public:
     TSharedRef<SWidget> ConstructCountColumn(const FMemreportFile& InMemreportFile);
 
     // 第三列VerticalBox Num列 NumKB 内存大小
-    TSharedRef<SWidget> ConstructNumColumn(const FMemreportFile& InMemreportFile);
+    TSharedRef<SWidget> ConstructTotalColumn(const FMemreportFile& InMemreportFile);
 
     // 第四列VerticalBox Max列 MaxKB
     TSharedRef<SWidget> ConstructMaxColumn(const FMemreportFile& InMemreportFile);
