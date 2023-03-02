@@ -161,11 +161,13 @@ struct FObjClass
 
 struct FObjectsStat
 {
-    FString Num;
+    // 表示该类型的对象的数量
+    FString Count;
+    // 表示该类型的对象的总大小，单位是MB
     FString Total;
     FString Max;
-    // 表示该类型的对象在保留时，额外占用的内存大小，单位是KB
-    FString ResExc;
+    // 表示该类型的对象在保留时，额外占用的内存大小，单位是MB
+    FString Res;
     FString ResDedSys;
     FString ResShrSys;
     FString ResDedVid;
@@ -174,10 +176,10 @@ struct FObjectsStat
 
     void Print() const
     {
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Num: %s"), *Num);
+        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Count: %s"), *Count);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat             Total: %s"), *Total);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Max: %s"), *Max);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat            ResExc: %s"), *ResExc);
+        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Res: %s"), *Res);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedSys: %s"), *ResDedSys);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResShrSys: %s"), *ResShrSys);
         UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedVid: %s"), *ResDedVid);
@@ -187,10 +189,10 @@ struct FObjectsStat
 
     void Empty()
     {
-        Num.Empty();
+        Count.Empty();
         Total.Empty();
         Max.Empty();
-        ResExc.Empty();
+        Res.Empty();
         ResDedSys.Empty();
         ResShrSys.Empty();
         ResDedVid.Empty();

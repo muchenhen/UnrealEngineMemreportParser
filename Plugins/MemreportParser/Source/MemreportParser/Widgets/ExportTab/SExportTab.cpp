@@ -237,14 +237,24 @@ TSharedRef<SWidget> SExportTab::ConstructClassColumn(const FMemreportFile& InMem
 
 TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMemreportFile)
 {
-    const FText ObjectsCount = FText::FromString(FString::FromInt(InMemreportFile.ObjectList.Num()));
+    // 数量信息
+    
+    // Objects的数量
+    const FText ObjectsCount = FText::FromString(InMemreportFile.ObjectsStat.Count);
+    // SpawnedActors的数量
     const FText SpawnedActorsCount = FText::FromString(FString::FromInt(InMemreportFile.SpawnedActors.Num()));
+    // ConfigCache的数量
     const FText ConfigCacheCount = FText::FromString(FString::FromInt(InMemreportFile.ConfigCaches.Num()));
+    // Textures的数量
     const FText TexturesCount = FText::FromString(InMemreportFile.TextureTotalStat.Count);
+    // ParticleSystems的数量
     const FText ParticleSystemsCount = FText::FromString(FString::FromInt(InMemreportFile.ParticleSystems.Num()));
-    const FText SkeletalMeshCount = FText::FromString(FString::FromInt(InMemreportFile.SkeletalMeshObjects.Num()));
-    const FText StaticMeshCount = FText::FromString(FString::FromInt(InMemreportFile.StaticMeshObjects.Num()));
-    const FText StaticMeshComponentCount = FText::FromString(FString::FromInt(InMemreportFile.StaticMeshComponentObjects.Num()));
+    // SkeletalMesh的数量
+    const FText SkeletalMeshCount = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Count);
+    // StaticMesh的数量
+    const FText StaticMeshCount = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Count);
+    // StaticMeshComponent的数量
+    const FText StaticMeshComponentCount = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Count);
 
     auto CountColumn =
         SNew(SVerticalBox)
@@ -353,27 +363,27 @@ TSharedRef<SWidget> SExportTab::ConstructCountColumn(const FMemreportFile& InMem
 
 TSharedRef<SWidget> SExportTab::ConstructNumColumn(const FMemreportFile& InMemreportFile)
 {
-    const FText ObjectsNum = FText::FromString(InMemreportFile.ObjectsStat.Num);
+    const FText ObjectsNum = FText::FromString(InMemreportFile.ObjectsStat.Count);
     // SpawnedActors并没有内存信息
     const FText SpawnedActorsNum = FText();
     const FText ConfigCacheNum = FText::FromString(InMemreportFile.GetConfigCacheMemNum());
     const FText TexturesNum = FText::FromString(InMemreportFile.TextureTotalStat.TotalSizeInMem);
     const FText ParticleSystemsNum = FText::FromString(InMemreportFile.ParticleSystemsTotal.Size);
-    const FText SkeletalMeshNum = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Num);
-    const FText StaticMeshNum = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Num);
-    const FText StaticMeshComponentNum = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Num);
+    const FText SkeletalMeshNum = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Count);
+    const FText StaticMeshNum = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Count);
+    const FText StaticMeshComponentNum = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Count);
 
     auto NumColumn =
         SNew(SVerticalBox)
 
-        // Num
+        // Count
         + SVerticalBox::Slot()
           .FillHeight(1)
           .VAlign(VAlign_Fill)
           .HAlign(HAlign_Left)
         [
             SNew(STextBlock)
-            .Text(LOCTEXT("Num_Loc", "Num"))
+            .Text(LOCTEXT("Num_Loc", "Count"))
             .TextStyle(&TitleTextBlockStyle)
         ]
 
@@ -589,7 +599,7 @@ TSharedRef<SWidget> SExportTab::ConstructMaxColumn(const FMemreportFile& InMemre
 
 TSharedRef<SWidget> SExportTab::ConstructResExcColumn(const FMemreportFile& InMemreportFile)
 {
-    const FText ObjectsResExc = FText::FromString(InMemreportFile.ObjectsStat.ResExc);
+    const FText ObjectsResExc = FText::FromString(InMemreportFile.ObjectsStat.Res);
     // Spawned Actors并没有内存信息
     const FText SpawnedActorsResExc = FText();
     // ConfigCache没有此内存信息
@@ -598,21 +608,21 @@ TSharedRef<SWidget> SExportTab::ConstructResExcColumn(const FMemreportFile& InMe
     const FText TexturesResExc = FText();
     // ParticleSystems没有此内存信息
     const FText ParticleSystemsResExc = FText();
-    const FText SkeletalMeshResExc = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.ResExc);
-    const FText StaticMeshResExc = FText::FromString(InMemreportFile.StaticMeshObjectsStat.ResExc);
-    const FText StaticMeshComponentResExc = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.ResExc);
+    const FText SkeletalMeshResExc = FText::FromString(InMemreportFile.SkeletalMeshObjectsStat.Res);
+    const FText StaticMeshResExc = FText::FromString(InMemreportFile.StaticMeshObjectsStat.Res);
+    const FText StaticMeshComponentResExc = FText::FromString(InMemreportFile.StaticMeshComponentObjectsStat.Res);
 
     auto ResExcColumn =
         SNew(SVerticalBox)
 
-        // ResExc
+        // Res
         + SVerticalBox::Slot()
           .FillHeight(1)
           .VAlign(VAlign_Fill)
           .HAlign(HAlign_Left)
         [
             SNew(STextBlock)
-            .Text(LOCTEXT("ResExc_Loc", "ResExc"))
+            .Text(LOCTEXT("ResExc_Loc", "Res"))
             .TextStyle(&TitleTextBlockStyle)
         ]
 

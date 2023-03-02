@@ -838,7 +838,7 @@ TArray<FLevels> UMemreportParserManager::LevelsParser(const TArray<FString>& Str
         }
         Levels.Add(OneLevels);
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Levels Num: %d"), Levels.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("Levels Count: %d"), Levels.Num());
     return Levels;
 }
 
@@ -882,7 +882,7 @@ void UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, cons
             FileData.ObjectsStat = AlphasortObjectsStat;
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Objects Num: %d"), ObjectList.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("Objects Count: %d"), ObjectList.Num());
     FileData.ObjectList = ObjectList;
 }
 
@@ -923,7 +923,7 @@ void UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringAr
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("SkeletalMesh Objects Num: %d"), SkeletalMeshObjects.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("SkeletalMesh Objects Count: %d"), SkeletalMeshObjects.Num());
     FileData.SkeletalMeshObjects = SkeletalMeshObjects;
 }
 
@@ -964,7 +964,7 @@ void UMemreportParserManager::StaticMeshParser(const TArray<FString>& StringArra
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("StaticMesh Objects Num: %d"), StaticMeshList.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("StaticMesh Objects Count: %d"), StaticMeshList.Num());
     FileData.StaticMeshObjects = StaticMeshList;
 }
 
@@ -1004,7 +1004,7 @@ TArray<FObjClass> UMemreportParserManager::LevelObjectParser(const TArray<FStrin
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Level Objects Num: %d"), LevelList.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("Level Objects Count: %d"), LevelList.Num());
     return LevelList;
 }
 
@@ -1045,7 +1045,7 @@ void UMemreportParserManager::StaticMeshComponentParser(const TArray<FString>& S
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("StaticMeshComponent Objects Num: %d"), StaticMeshComponentList.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("StaticMeshComponent Objects Count: %d"), StaticMeshComponentList.Num());
     FileData.StaticMeshComponentObjects = StaticMeshComponentList;
 }
 
@@ -1386,7 +1386,7 @@ FObjectsStat UMemreportParserManager::ObjectsStatParser(const FString& String)
     {
         TArray<FString> OutStrings;
         Results[0].ParseIntoArray(OutStrings, TEXT(" "));
-        ObjectsStat.Num = OutStrings[0];
+        ObjectsStat.Count = OutStrings[0];
         OutStrings.Empty();
         for (int i = 1; i < 9; i++)
         {
@@ -1402,9 +1402,9 @@ FObjectsStat UMemreportParserManager::ObjectsStatParser(const FString& String)
             {
                 ObjectsStat.Max = OutStrings[1].Replace(TEXT("M"), TEXT(""));
             }
-            else if (OutStrings[0] == TEXT("ResExc"))
+            else if (OutStrings[0] == TEXT("Res"))
             {
-                ObjectsStat.ResExc = OutStrings[1].Replace(TEXT("M"), TEXT(""));
+                ObjectsStat.Res = OutStrings[1].Replace(TEXT("M"), TEXT(""));
             }
             else if (OutStrings[0] == TEXT("ResDedSys"))
             {
@@ -1485,7 +1485,7 @@ bool UMemreportParserManager::CheckCurrentFile()
     {
         if (FilesData.Num() <= 0)
         {
-            UE_LOG(LogMemreportParser, Error, TEXT("FilesData.Num() <= 0"));
+            UE_LOG(LogMemreportParser, Error, TEXT("FilesData.Count() <= 0"));
             return false;
         }
         if (!FilesData.Contains(CurrentFileName))
