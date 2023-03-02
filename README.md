@@ -18,6 +18,11 @@ UE4 插件
 [//]: # (Img/StatTab.png)
 <a href="Img/StatTab.png"><img src="Img/StatTab.png" alt="StatTab" style="max-width:60%;" /></a>
 
+### 内容导出
+    
+[//]: # (Img/ExportTab.png)
+<a href="Img/ExportTab.png"><img src="Img/ExportTab.png" alt="ExportTab" style="max-width:60%;" /></a>
+
 ### Texture分析
 
 [//]: # (Img/TextureTab.png)
