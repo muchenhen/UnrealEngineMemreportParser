@@ -83,37 +83,9 @@ struct FObj
     FString ResExcShrVidKB;
     FString ResExcUnkKB;
 
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("Class");
-        Header.Add("Count");
-        Header.Add("NumKB");
-        Header.Add("MaxKB");
-        Header.Add("ResExcKB");
-        Header.Add("ResExcDedSysKB");
-        Header.Add("ResExcShrSysKB");
-        Header.Add("ResExcDedVidKB");
-        Header.Add("ResExcShrVidKB");
-        Header.Add("ResExcUnkKB");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-    TArray<FString> GetDataArray() const
-    {
-        TArray<FString> Data;
-        Data.Add(Class);
-        Data.Add(Count);
-        Data.Add(NumKB);
-        Data.Add(MaxKB);
-        Data.Add(ResExcKB);
-        Data.Add(ResExcDedSysKB);
-        Data.Add(ResExcShrSysKB);
-        Data.Add(ResExcDedVidKB);
-        Data.Add(ResExcShrVidKB);
-        Data.Add(ResExcUnkKB);
-        return Data;
-    }
+    TArray<FString> GetDataArray() const;
 };
 
 struct FObjClass
@@ -128,42 +100,19 @@ struct FObjClass
     FString ResExcShrVidKB;
     FString ResExcUnkKB;
 
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("Object");
-        Header.Add("NumKB");
-        Header.Add("MaxKB");
-        Header.Add("ResExcKB");
-        Header.Add("ResExcDedSysKB");
-        Header.Add("ResExcShrSysKB");
-        Header.Add("ResExcDedVidKB");
-        Header.Add("ResExcShrVidKB");
-        Header.Add("ResExcUnkKB");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-    TArray<FString> GetDataArray() const
-    {
-        TArray<FString> Data;
-        Data.Add(Object);
-        Data.Add(NumKB);
-        Data.Add(MaxKB);
-        Data.Add(ResExcKB);
-        Data.Add(ResExcDedSysKB);
-        Data.Add(ResExcShrSysKB);
-        Data.Add(ResExcDedVidKB);
-        Data.Add(ResExcShrVidKB);
-        Data.Add(ResExcUnkKB);
-        return Data;
-    }
+    TArray<FString> GetDataArray() const;
 };
 
 struct FObjectsStat
 {
-    FString Num;
+    // 表示该类型的对象的数量
+    FString Count;
+    // 表示该类型的对象的总大小，单位是MB
     FString Total;
     FString Max;
+    // 表示该类型的对象在保留时，额外占用的内存大小，单位是MB
     FString Res;
     FString ResDedSys;
     FString ResShrSys;
@@ -171,31 +120,10 @@ struct FObjectsStat
     FString ResShrVid;
     FString ResUnknown;
 
-    void Print() const
-    {
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Num: %s"), *Num);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat             Total: %s"), *Total);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Max: %s"), *Max);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat               Res: %s"), *Res);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedSys: %s"), *ResDedSys);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResShrSys: %s"), *ResShrSys);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResDedVid: %s"), *ResDedVid);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat         ResShrVid: %s"), *ResShrVid);
-        UE_LOG(LogMemreportParser, Display, TEXT("FObjectsStat        ResUnknown: %s"), *ResUnknown);
-    }
+    void Print() const;
 
-    void Empty()
-    {
-        Num.Empty();
-        Total.Empty();
-        Max.Empty();
-        Res.Empty();
-        ResDedSys.Empty();
-        ResShrSys.Empty();
-        ResDedVid.Empty();
-        ResShrVid.Empty();
-        ResUnknown.Empty();
-    }
+    void Empty();
+    
 };
 
 struct FSpawnedActor
@@ -207,29 +135,9 @@ struct FSpawnedActor
     FString Name;
     FString Owner;
 
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("TimeUnseen");
-        Header.Add("TimeAlive");
-        Header.Add("Distance");
-        Header.Add("Class");
-        Header.Add("Name");
-        Header.Add("Owner");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-    TArray<FString> GetDataArray() const
-    {
-        TArray<FString> Data;
-        Data.Add(TimeUnseen);
-        Data.Add(TimeAlive);
-        Data.Add(Distance);
-        Data.Add(Class);
-        Data.Add(Name);
-        Data.Add(Owner);
-        return Data;
-    }
+    TArray<FString> GetDataArray() const;
 };
 
 struct FParticleDynamicMemory
@@ -242,31 +150,9 @@ struct FParticleDynamicMemory
     FString GTMem;
     FString GTMemMax;
 
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("Type");
-        Header.Add("Count");
-        Header.Add("MaxCount");
-        Header.Add("Mem");
-        Header.Add("MaxMem");
-        Header.Add("GTMem");
-        Header.Add("GTMemMax");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-    TArray<FString> GetDataArray() const
-    {
-        TArray<FString> Data;
-        Data.Add(Type);
-        Data.Add(Count);
-        Data.Add(MaxCount);
-        Data.Add(Mem);
-        Data.Add(MaxMem);
-        Data.Add(GTMem);
-        Data.Add(GTMemMax);
-        return Data;
-    }
+    TArray<FString> GetDataArray() const;
 };
 
 struct FConfigCache
@@ -275,23 +161,9 @@ struct FConfigCache
     FString NumBytes;
     FString MaxBytes;
 
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("FileName");
-        Header.Add("NumBytes");
-        Header.Add("MaxBytes");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-    TArray<FString> GetDataArray() const
-    {
-        TArray<FString> Data;
-        Data.Add(FileName);
-        Data.Add(NumBytes);
-        Data.Add(MaxBytes);
-        return Data;
-    }
+    TArray<FString> GetDataArray() const;
 };
 
 /**
@@ -321,37 +193,9 @@ struct FTextureMemory
     // 使用次数
     FString UsageCount;
     
-    static TArray<FString> GetHeader()
-    {
-        TArray<FString> Header;
-        Header.Add("CookedWidth");
-        Header.Add("AuthoredBias");
-        Header.Add("CookedSize");
-        Header.Add("InMemWidth");
-        Header.Add("InMemSize");
-        Header.Add("Format");
-        Header.Add("LODGroup");
-        Header.Add("Name");
-        Header.Add("Streaming");
-        Header.Add("UsageCount");
-        return Header;
-    }
+    static TArray<FString> GetHeader();
 
-     TArray<FString> GetDataArray() const
-     {
-        TArray<FString> Data;
-        Data.Add(CookedWidth);
-        Data.Add(AuthoredBias);
-        Data.Add(CookedSize);
-        Data.Add(InMemWidth);
-        Data.Add(InMemSize);
-        Data.Add(Format);
-        Data.Add(LODGroup);
-        Data.Add(Name);
-        Data.Add(Streaming);
-        Data.Add(UsageCount);
-        return Data;
-    }
+     TArray<FString> GetDataArray() const;
 };
 
 struct FTextureGroupStat
@@ -372,7 +216,7 @@ struct FTextureTotalStat
     FString TotalSizeOnDisk;
     // 纹理的总数量
     FString Count;
-    // TODO：这是啥？
+    // 表示纹理的数量，不包括LODGroup为TEXTUREGROUP_World的纹理。
     FString CountApplicableToMin;
     // 每一个TextureGroup的统计信息
     TArray<FTextureGroupStat> TextureGroupStats;
@@ -383,7 +227,11 @@ enum ECSVFileType
     Obj,
     SpawnedActors,
     ConfigCache,
-    Texture
+    Texture,
+    ParticleSystems,
+    SkeletalMeshes,
+    StaticMeshes,
+    StaticMeshComponents
 };
 
 struct FLevels
@@ -414,18 +262,31 @@ struct FParticleSystem
     FString ComponentCount;
     FString CompResSize;
     FString CompTrueResSize;
+
+    static TArray<FString> GetHeader();
+    TArray<FString> GetDataArray() const;
 };
 
 struct FParticleSystemsTotal
 {
     FString Name;
+    // 内存占用大小
     FString Size;
+    // TODO: 这个是什么
     FString PSysSize;
+    // TODO: 这个是什么
     FString ModuleSize;
+    // 组件的大小
     FString ComponentSize;
+    // 组件的数量
     FString ComponentCount;
+    // 组件的资源大小
     FString ComponentResourceSize;
+    // 组件的真实资源大小，运行时的大小
     FString ComponentTrueResourceSize;
+    
+public:
+    FString GetSizeInKB() const;
 };
 
 /**
@@ -435,29 +296,29 @@ struct FMemreportFile
 {
     FStatMemory StatMemory;
     TArray<FObj> ObjectList;
+    FObjectsStat ObjectsStat;
     TArray<FSpawnedActor> SpawnedActors;
     TArray<FParticleDynamicMemory> ParticleDynamicMemories;
     TArray<FConfigCache> ConfigCaches;
     TArray<FTextureMemory> TextureMemories;
     FTextureTotalStat TextureTotalStat;
     TArray<FObjClass> SkeletalMeshObjects;
+    FObjectsStat SkeletalMeshObjectsStat;
     TArray<FObjClass> StaticMeshObjects;
+    FObjectsStat StaticMeshObjectsStat;
     TArray<FObjClass> LevelObjects;
     TArray<FObjClass> StaticMeshComponentObjects;
+    FObjectsStat StaticMeshComponentObjectsStat;
     TArray<FLevels> Levels;
     TArray<FRHIResourceMemory> RHIResourceMemories;
     TArray<FParticleSystem> ParticleSystems;
     FParticleSystemsTotal ParticleSystemsTotal;
 
-    bool IsValid() const
-    {
-        if (StatMemory.Platform == "")
-        {
-            UE_LOG(LogTemp, Error, TEXT("StatMemory.Platform is empty, %s"), *StatMemory.Platform);
-            return false;
-        }
-        return true;
-    }
+    bool IsValid() const;
+
+    FString GetConfigCacheMemNumInKB() const;
+    FString GetConfigCacheMaxMemNumInKB() const;
+    // FString GetParticleSystems
 };
 
 struct FMemreportViewModel

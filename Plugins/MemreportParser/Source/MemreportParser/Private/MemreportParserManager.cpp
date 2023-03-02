@@ -292,8 +292,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartObj != 0 && EndObj != 0)
     {
-        const TArray<FObj> ObjectList = ObjParser(StringArray, StartObj, EndObj);
-        FileData.ObjectList = ObjectList;
+        ObjParser(StringArray, StartObj, EndObj, FileData);
     }
 
     if (StartRHI != 0 && EndRHI != 0)
@@ -344,14 +343,12 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartSkeletalMesh != 0 && EndSkeletalMesh != 0)
     {
-        const TArray<FObjClass> SkeletalMeshObjects = SkeletalMeshParser(StringArray, StartSkeletalMesh, EndSkeletalMesh);
-        FileData.SkeletalMeshObjects = SkeletalMeshObjects;
+        SkeletalMeshParser(StringArray, StartSkeletalMesh, EndSkeletalMesh, FileData);
     }
 
     if (StartStaticMesh != 0 && EndStaticMesh != 0)
     {
-        const TArray<FObjClass> StaticMeshObjects = StaticMeshParser(StringArray, StartStaticMesh, EndStaticMesh);
-        FileData.StaticMeshObjects = StaticMeshObjects;
+        StaticMeshParser(StringArray, StartStaticMesh, EndStaticMesh, FileData);
     }
 
     if (StartLevel != 0 && EndLevel != 0)
@@ -362,8 +359,7 @@ FMemreportFile UMemreportParserManager::FileParser(const FString& FileContent)
 
     if (StartStaticMeshComponent != 0 && EndStaticMeshComponent != 0)
     {
-        const TArray<FObjClass> StaticMeshComponentObjects = StaticMeshComponentParser(StringArray, StartStaticMeshComponent, EndStaticMeshComponent);
-        FileData.StaticMeshComponentObjects = StaticMeshComponentObjects;
+        StaticMeshComponentParser(StringArray, StartStaticMeshComponent, EndStaticMeshComponent, FileData);
     }
 
     return FileData;
@@ -842,11 +838,11 @@ TArray<FLevels> UMemreportParserManager::LevelsParser(const TArray<FString>& Str
         }
         Levels.Add(OneLevels);
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Levels Num: %d"), Levels.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("Levels Count: %d"), Levels.Num());
     return Levels;
 }
 
-TArray<FObj> UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj)
+void UMemreportParserManager::ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj, FMemreportFile& FileData)
 {
     bool bStart = false;
     TArray<FObj> ObjectList;
@@ -883,13 +879,14 @@ TArray<FObj> UMemreportParserManager::ObjParser(const TArray<FString>& StringArr
         {
             AlphasortObjectsStat = ObjectsStatParser(String);
             AlphasortObjectsStat.Print();
+            FileData.ObjectsStat = AlphasortObjectsStat;
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Objects Num: %d"), ObjectList.Num());
-    return ObjectList;
+    UE_LOG(LogMemreportParser, Display, TEXT("Objects Count: %d"), ObjectList.Num());
+    FileData.ObjectList = ObjectList;
 }
 
-TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh)
+void UMemreportParserManager::SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh, FMemreportFile& FileData)
 {
     TArray<FObjClass> SkeletalMeshObjects;
     for (int i = StartSkeletalMesh; i <= EndSkeletalMesh; i++)
@@ -919,17 +916,18 @@ TArray<FObjClass> UMemreportParserManager::SkeletalMeshParser(const TArray<FStri
         {
             SkeletalMeshObjectsStat = ObjectsStatParser(String);
             SkeletalMeshObjectsStat.Print();
+            FileData.SkeletalMeshObjectsStat = SkeletalMeshObjectsStat;
         }
         else if (!String.IsEmpty() && EndSkeletalMesh - i < 5)
         {
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("SkeletalMesh Objects Num: %d"), SkeletalMeshObjects.Num());
-    return SkeletalMeshObjects;
+    UE_LOG(LogMemreportParser, Display, TEXT("SkeletalMesh Objects Count: %d"), SkeletalMeshObjects.Num());
+    FileData.SkeletalMeshObjects = SkeletalMeshObjects;
 }
 
-TArray<FObjClass> UMemreportParserManager::StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh)
+void UMemreportParserManager::StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh, FMemreportFile& FileData)
 {
     TArray<FObjClass> StaticMeshList;
     for (int i = StartStaticMesh; i <= EndStaticMesh; i++)
@@ -959,14 +957,15 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshParser(const TArray<FString
         {
             StaticMeshObjectsStat = ObjectsStatParser(String);
             StaticMeshObjectsStat.Print();
+            FileData.StaticMeshObjectsStat = StaticMeshObjectsStat;
         }
         else if (!String.IsEmpty() && EndStaticMesh - i < 5)
         {
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("StaticMesh Objects Num: %d"), StaticMeshList.Num());
-    return StaticMeshList;
+    UE_LOG(LogMemreportParser, Display, TEXT("StaticMesh Objects Count: %d"), StaticMeshList.Num());
+    FileData.StaticMeshObjects = StaticMeshList;
 }
 
 TArray<FObjClass> UMemreportParserManager::LevelObjectParser(const TArray<FString>& StringArray, const int& StartLevel, const int& EndLevel)
@@ -1005,11 +1004,11 @@ TArray<FObjClass> UMemreportParserManager::LevelObjectParser(const TArray<FStrin
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("Level Objects Num: %d"), LevelList.Num());
+    UE_LOG(LogMemreportParser, Display, TEXT("Level Objects Count: %d"), LevelList.Num());
     return LevelList;
 }
 
-TArray<FObjClass> UMemreportParserManager::StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent)
+void UMemreportParserManager::StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent, FMemreportFile& FileData)
 {
     TArray<FObjClass> StaticMeshComponentList;
     for (int i = StartStaticMeshComponent; i <= EndStaticMeshComponent; i++)
@@ -1039,14 +1038,15 @@ TArray<FObjClass> UMemreportParserManager::StaticMeshComponentParser(const TArra
         {
             StaticMeshComponentObjectsStat = ObjectsStatParser(String);
             StaticMeshComponentObjectsStat.Print();
+            FileData.StaticMeshComponentObjectsStat = StaticMeshComponentObjectsStat;
         }
         else if (!String.IsEmpty() && EndStaticMeshComponent - i < 5)
         {
             UE_LOG(LogMemreportParser, Display, TEXT("%s"), *String);
         }
     }
-    UE_LOG(LogMemreportParser, Display, TEXT("StaticMeshComponent Objects Num: %d"), StaticMeshComponentList.Num());
-    return StaticMeshComponentList;
+    UE_LOG(LogMemreportParser, Display, TEXT("StaticMeshComponent Objects Count: %d"), StaticMeshComponentList.Num());
+    FileData.StaticMeshComponentObjects = StaticMeshComponentList;
 }
 
 TArray<FSpawnedActor> UMemreportParserManager::SpawnedActorsParser(const TArray<FString>& StringArray, const int& StartActors, const int& EndActors)
@@ -1386,7 +1386,7 @@ FObjectsStat UMemreportParserManager::ObjectsStatParser(const FString& String)
     {
         TArray<FString> OutStrings;
         Results[0].ParseIntoArray(OutStrings, TEXT(" "));
-        ObjectsStat.Num = OutStrings[0];
+        ObjectsStat.Count = OutStrings[0];
         OutStrings.Empty();
         for (int i = 1; i < 9; i++)
         {
@@ -1471,6 +1471,18 @@ FString UMemreportParserManager::GetCSVFileName(const FString& OriFileName, ECSV
     case Texture:
         FileName += TEXT("-Texture");
         break;
+    case ParticleSystems:
+        FileName += TEXT("-ParticleSystems");
+        break;
+    case SkeletalMeshes:
+        FileName += TEXT("-SkeletalMeshes");
+        break;
+    case StaticMeshes:
+        FileName += TEXT("-StaticMeshes");
+        break;
+    case StaticMeshComponents:
+        FileName += TEXT("-StaticMeshComponents");
+        break;
     default:
         break;
     }
@@ -1485,7 +1497,7 @@ bool UMemreportParserManager::CheckCurrentFile()
     {
         if (FilesData.Num() <= 0)
         {
-            UE_LOG(LogMemreportParser, Error, TEXT("FilesData.Num() <= 0"));
+            UE_LOG(LogMemreportParser, Error, TEXT("FilesData.Count() <= 0"));
             return false;
         }
         if (!FilesData.Contains(CurrentFileName))
@@ -1599,6 +1611,106 @@ void UMemreportParserManager::SaveTexturesToCSV()
     else
     {
         UE_LOG(LogMemreportParser, Error, TEXT("Save Texture to CSV Failed"));
+    }
+}
+
+void UMemreportParserManager::SaveParticleSystemsToCSV()
+{
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FParticleSystem> ParticleSystems = FilesData[CurrentFileName].ParticleSystems;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::ParticleSystems);
+    
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FParticleSystem::GetHeader()));
+    for (auto& ParticleSystem : ParticleSystems)
+    {
+        OutStrings.Add(TransFStringArrayToFString(ParticleSystem.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save ParticleSystems to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save ParticleSystems to CSV Failed"));
+    }
+}
+
+void UMemreportParserManager::SaveSkeletalMeshesToCSV()
+{
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> SkeletalMeshes = FilesData[CurrentFileName].SkeletalMeshObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::SkeletalMeshes);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& SkeletalMesh : SkeletalMeshes)
+    {
+        OutStrings.Add(TransFStringArrayToFString(SkeletalMesh.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save SkeletalMeshes to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save SkeletalMeshes to CSV Failed"));
+    }
+}
+
+void UMemreportParserManager::SaveStaticMeshesToCSV()
+{
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> StaticMeshes = FilesData[CurrentFileName].StaticMeshObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshes);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& StaticMesh : StaticMeshes)
+    {
+        OutStrings.Add(TransFStringArrayToFString(StaticMesh.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save StaticMeshes to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save StaticMeshes to CSV Failed"));
+    }
+}
+
+void UMemreportParserManager::SaveStaticMeshComponentsToCSV()
+{
+    if (!CheckCurrentFile())
+        return;
+
+    TArray<FObjClass> StaticMeshComponents = FilesData[CurrentFileName].StaticMeshComponentObjects;
+    const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshComponents);
+
+    TArray<FString> OutStrings;
+    OutStrings.Add(TransFStringArrayToFString(FObjClass::GetHeader()));
+    for (auto& StaticMeshComponent : StaticMeshComponents)
+    {
+        OutStrings.Add(TransFStringArrayToFString(StaticMeshComponent.GetDataArray()));
+    }
+    const bool bSuccess = FFileHelper::SaveStringArrayToFile(OutStrings, *FileName, FFileHelper::EEncodingOptions::ForceUTF8);
+    if (bSuccess)
+    {
+        UE_LOG(LogMemreportParser, Display, TEXT("Save StaticMeshComponents to CSV Success : %s"), *FileName);
+    }
+    else
+    {
+        UE_LOG(LogMemreportParser, Error, TEXT("Save StaticMeshComponents to CSV Failed"));
     }
 }
 
