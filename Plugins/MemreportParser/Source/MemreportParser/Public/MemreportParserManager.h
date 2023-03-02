@@ -98,21 +98,21 @@ public:
     static void ParticleSystemsParser(const TArray<FString>& StringArray, const int& StartParticleSystems, const int& EndParticleSystems, FMemreportFile& MemreportFile);
 
     // 解析Object List相关
-    static TArray<FObj> ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj);
+    static void ObjParser(const TArray<FString>& StringArray, const int& StartObj, const int& EndObj, FMemreportFile& FileData);
 
     // TODO：解析Objects SoundWave类型相关
 
     // 解析Objects SkeletalMesh类型相关
-    static TArray<FObjClass> SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh);
+    static void SkeletalMeshParser(const TArray<FString>& StringArray, const int& StartSkeletalMesh, const int& EndSkeletalMesh, FMemreportFile& FileData);
 
     // 解析Objects StaticMesh类型相关
-    static TArray<FObjClass> StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh);
+    static void StaticMeshParser(const TArray<FString>& StringArray, const int& StartStaticMesh, const int& EndStaticMesh, FMemreportFile& FileData);
 
     // 解析Objects Level类型相关
     static TArray<FObjClass> LevelObjectParser(const TArray<FString>& StringArray, const int& StartLevel, const int& EndLevel);
 
     // 解析Objects StaticMeshComponent类型相关
-    static TArray<FObjClass> StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent);
+    static void StaticMeshComponentParser(const TArray<FString>& StringArray, const int& StartStaticMeshComponent, const int& EndStaticMeshComponent, FMemreportFile& FileData);
 
     // 解析Objects的总结行 是一个出现较多的东西
     static FObjectsStat ObjectsStatParser(const FString& String);
@@ -138,4 +138,16 @@ public: // 以下是一些导出文件相关的函数
 
     // 输出所有的Texture信息到CSV文件
     static void SaveTexturesToCSV();
+
+    // 输出所有的ParticleSystems信息到CSV文件
+    static void SaveParticleSystemsToCSV();
+
+    // 输出所有的SkeletalMesh信息到CSV文件
+    static void SaveSkeletalMeshesToCSV();
+
+    // 输出所有的StaticMesh信息到CSV文件
+    static void SaveStaticMeshesToCSV();
+
+    // 输出所有的StaticMeshComponent信息到CSV文件
+    static void SaveStaticMeshComponentsToCSV();
 };

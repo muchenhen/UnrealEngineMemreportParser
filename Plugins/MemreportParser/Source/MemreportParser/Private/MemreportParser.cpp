@@ -106,7 +106,7 @@ void FMemreportParserModule::PluginButtonClicked()
     const TSharedRef<SWindow> RootWindow =
         SNew(SWindow)
         .AutoCenter(EAutoCenter::PreferredWorkArea)
-        .Title(NSLOCTEXT("TraceInsightsModule", "UnrealInsightsBrowserAppName", "Unreal Insights Session Browser"))
+        .Title(LOCTEXT("MemreportParserAppName", "Unreal Memreport Browser"))
         .IsInitiallyMaximized(false)
         .ClientSize(FVector2D(WindowWidth, WindowHeight))
         .SupportsMaximize(true)

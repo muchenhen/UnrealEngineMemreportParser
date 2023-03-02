@@ -3,9 +3,12 @@
 
 #include "SStatTab.h"
 
+#include "MemreportTools.h"
 #include "SlateOptMacros.h"
 #include "Engine/AssetManager.h"
 #include "Framework/Styling/TextBlockWidgetStyle.h"
+#include "MemreportParser/Widgets/Chart/SBarGraphWidget.h"
+#include "MemreportParser/Widgets/Chart/SHistogramWidget.h"
 #include "Widgets/SCanvas.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -15,14 +18,17 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStatTab::Construct(const FArguments& InArgs)
 {
     StatMemory = InArgs._StatMemory;
-    
+
     SDockTab::Construct(SDockTab::FArguments()
         .TabRole(ETabRole::NomadTab)
         
         [
 		    SNew(SOverlay)
 		    .Visibility(EVisibility::SelfHitTestInvisible)
-		    
+
+		    /*
+		     * 左上角 两行大字 系统启动时间和平台
+		     */
 		    + SOverlay::Slot()
 		    .HAlign(HAlign_Left)
 		    .VAlign(VAlign_Top)
@@ -37,6 +43,11 @@ void SStatTab::Construct(const FArguments& InArgs)
                 ]
             ]
 
+            /*
+             * 接着左上角的
+             * Process Physical Memory: xxx MB used, xxx MB peak
+             * Process Virtual Memory: xxx MB used, xxx MB peak
+             */
             + SOverlay::Slot()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Top)
@@ -49,7 +60,33 @@ void SStatTab::Construct(const FArguments& InArgs)
                 [
                     SNew(SBox)
                     .WidthOverride(600)
-                    .HeightOverride(300)
+                    .HeightOverride(150)
+                    .Padding(FMargin(2.0f))
+                    .Clipping(EWidgetClipping::ClipToBounds)
+                    [
+                        ConstructProcessMemoryPanel(StatMemory)
+                    ]
+                ]
+            ]
+
+            /*
+             * 左边再往下
+             * Physical Memory: 4938.33 MB used,  2335.36 MB free, 7273.69 MB total
+             * Virtual Memory: 2436.47 MB used,  1659.53 MB free, 4096.00 MB total
+             */
+            + SOverlay::Slot()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
+            .Padding(10,280,0,0)
+            [
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(FSlateColor(FLinearColor(243, 156, 18)))
+                .Content()
+                [
+                    SNew(SBox)
+                    .WidthOverride(600)
+                    .HeightOverride(150)
                     .Padding(FMargin(2.0f))
                     .Clipping(EWidgetClipping::ClipToBounds)
                     [
@@ -58,17 +95,51 @@ void SStatTab::Construct(const FArguments& InArgs)
                 ]
             ]
 
+            /*
+             * FMallocBinned2 Mem report的一堆东西 右侧
+             */
             + SOverlay::Slot()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Top)
-            .Padding(650,10,0,0)
+            .Padding(650,10,5,10)
             [
-                SNew(SBox)
-                .WidthOverride(600)
-                .HeightOverride(420)
-                .Clipping(EWidgetClipping::ClipToBounds)
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(MemreportTools::StringToSlateColor("ffaf65"))
+                .Content()
                 [
-                    ConstructFMallocBinned2Panel(StatMemory)
+                    SNew(SBox)
+                    .WidthOverride(600)
+                    .HeightOverride(700)
+                    .Padding(FMargin(2.0f))
+                    .Clipping(EWidgetClipping::ClipToBounds)
+                    [
+                        ConstructFMallocBinned2Panel(StatMemory)
+                    ]
+                ]
+            ]
+
+            /*
+             * 左侧最下面的部分 Memory Stats:
+             */
+            + SOverlay::Slot()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Top)
+            .Padding(10,440,10,0)
+            [
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(FLinearColor::Black)
+                .Content()
+                [
+                    SNew(SBox)
+                    .WidthOverride(600.0f)
+                    .HeightOverride(270.0f)
+                    .Padding(FMargin(2.0f))
+                    .Clipping(EWidgetClipping::ClipToBounds)
+                    [
+                        ConstructMemoryStatsPanel(StatMemory)
+                    ]
                 ]
             ]
 	    ]);
@@ -150,7 +221,7 @@ TSharedRef<SWidget> SStatTab::ConstructStatPanel(const FStatMemory& InFStatMemor
             ];
 }
 
-TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMemory)
+TSharedRef<SWidget> SStatTab::ConstructProcessMemoryPanel(const FStatMemory& InFStatMemory)
 {
     const FTextBlockStyle HeaderTextBlockStyle =
         FTextBlockStyle()
@@ -216,6 +287,151 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMem
                 .Text(LOCTEXT("ProcessVirtualMemory_LOC", "Process Virtual Memory:"))
                 .TextStyle(&TextBlockStyle)
             ]
+        ]
+    
+        + SHorizontalBox::Slot()
+        .FillWidth(0.2)
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Fill)
+        .Padding(FMargin(0,0,20,0))
+        [
+            // 垂直框
+            SNew(SVerticalBox)
+            .Clipping(EWidgetClipping::Inherit)
+
+            // 已使用的内存大小
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(LOCTEXT("Used_LOC", "Used(MB)"))
+                .TextStyle(&HeaderTextBlockStyle)
+            ]
+
+            // Process Physical Memory Used Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.ProcessPhysicalMemoryUsed))
+                .TextStyle(&TextBlockStyle)
+            ]
+
+            // Process Virtual Memory Used Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.ProcessVirtualMemoryUsed))
+                .TextStyle(&TextBlockStyle)
+            ]
+        ]
+
+        + SHorizontalBox::Slot()
+        .FillWidth(0.2)
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Fill)
+        .Padding(FMargin(0,0,20,0))
+        [
+            // 垂直框
+            SNew(SVerticalBox)
+            .Clipping(EWidgetClipping::Inherit)
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(LOCTEXT("Peak_LOC", "Peak(MB)"))
+                .TextStyle(&HeaderTextBlockStyle)
+            ]
+
+            // Process Physical Memory Peak Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.ProcessPhysicalMemoryPeak))
+                .TextStyle(&TextBlockStyle)
+            ]
+
+            // Process Virtual Memory Peak Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.ProcessVirtualMemoryPeak))
+                .TextStyle(&TextBlockStyle)
+            ]
+        ]
+    ;
+    
+    return MemoryPanel;
+}
+
+TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMemory)
+{
+    const FTextBlockStyle HeaderTextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 18))
+        .SetFontSize(18)
+        .SetColorAndOpacity(FLinearColor::White);
+
+    const FTextBlockStyle TextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"), 14))
+        .SetFontSize(14)
+        .SetColorAndOpacity(FLinearColor::White);
+
+    auto MemoryPanel =
+        SNew(SHorizontalBox)
+        .Clipping(EWidgetClipping::Inherit)
+    
+        + SHorizontalBox::Slot()
+        .FillWidth(0.4)
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Fill)
+        .Padding(FMargin(0,0,20,0))
+        [
+            // 垂直框
+            SNew(SVerticalBox)
+            .Clipping(EWidgetClipping::Inherit)
+
+            // 内存类型
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(LOCTEXT("Memory_LOC", "Memory"))
+                .TextStyle(&HeaderTextBlockStyle)
+            ]
 
             // Physical Memory
             + SVerticalBox::Slot()
@@ -243,12 +459,12 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMem
                 .TextStyle(&TextBlockStyle)
             ]
         ]
-    
+
         + SHorizontalBox::Slot()
         .FillWidth(0.2)
         .HAlign(HAlign_Left)
         .VAlign(VAlign_Fill)
-        .Padding(FMargin(0,0,20,0))
+        .Padding(FMargin(10,0,20,0))
         [
             // 垂直框
             SNew(SVerticalBox)
@@ -259,6 +475,7 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMem
             .AutoHeight()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
@@ -266,42 +483,131 @@ TSharedRef<SWidget> SStatTab::ConstructMemoryPanel(const FStatMemory& InFStatMem
                 .TextStyle(&HeaderTextBlockStyle)
             ]
 
-            // Process Physical Memory Used Size
+            // Physical Memory Used Size
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(FText::FromString(InFStatMemory.ProcessPhysicalMemoryUsed))
+                .Text(FText::FromString(InFStatMemory.PhysicalMemoryUsed))
+                .TextStyle(&TextBlockStyle)
+            ]
+
+            // Virtual Memory Used Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.VirtualMemoryUsed))
                 .TextStyle(&TextBlockStyle)
             ]
         ]
 
         + SHorizontalBox::Slot()
         .FillWidth(0.2)
-        .HAlign(HAlign_Right)
+        .HAlign(HAlign_Left)
         .VAlign(VAlign_Fill)
-        .Padding(FMargin(0,0,20,0))
+        .Padding(FMargin(10,0,20,0))
         [
-            // 垂直框
             SNew(SVerticalBox)
             .Clipping(EWidgetClipping::Inherit)
 
+            // free
             + SVerticalBox::Slot()
             .AutoHeight()
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Peak_LOC", "Peak(MB)"))
+                .Text(LOCTEXT("Free_LOC", "Free(MB)"))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
+
+            // Physical Memory Free Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.PhysicalMemoryFree))
+                .TextStyle(&TextBlockStyle)
+            ]
+
+            // Virtual Memory Free Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.VirtualMemoryFree))
+                .TextStyle(&TextBlockStyle)
+            ]
         ]
-    ;
-    
+
+        + SHorizontalBox::Slot()
+        .FillWidth(0.2)
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Fill)
+        .Padding( FMargin(10,0,20,0))
+        [
+            SNew(SVerticalBox)
+            .Clipping(EWidgetClipping::Inherit)
+
+            // total
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(LOCTEXT("Total_LOC", "Total(MB)"))
+                .TextStyle(&HeaderTextBlockStyle)
+            ]
+
+            // Physical Memory Total Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.PhysicalMemoryTotal))
+                .TextStyle(&TextBlockStyle)
+            ]
+
+            // Virtual Memory Total Size
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Center)
+            .Padding(FMargin(0,5))
+            [
+                SNew(STextBlock)
+                .Clipping(EWidgetClipping::Inherit)
+                .Text(FText::FromString(InFStatMemory.VirtualMemoryTotal))
+                .TextStyle(&TextBlockStyle)
+            ]
+        ];
+
     return MemoryPanel;
 }
 
@@ -351,7 +657,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Constants.BinnedPageSizeValue_LOC", "65536"))
+                .Text(FText::FromString(InFStatMemory.ConstantsBinnedPageSize))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -383,7 +689,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Constants.BinnedAllocationGranularityValue_LOC", "65536"))
+                .Text(FText::FromString(InFStatMemory.ConstantsBinnedAllocationGranularity))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -415,7 +721,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Small Pool AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.SmallPoolAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -447,7 +753,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Small Pool OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.SmallPoolOSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -479,7 +785,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Large Pool Requested AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.LargePoolRequestedAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -511,7 +817,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Large Pool OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.LargePoolOSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -543,7 +849,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Requested AllocationsValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.RequestedAllocations))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -575,7 +881,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("OS AllocatedValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.OSAllocated))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -607,7 +913,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("PoolInfoValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.PoolInfo))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -639,7 +945,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("HashValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.Hash))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -671,7 +977,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("TLSValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.TLS))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -703,7 +1009,7 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Total allocated from OSValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.TotalAllocatedFromOS))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
@@ -735,12 +1041,112 @@ TSharedRef<SWidget> SStatTab::ConstructFMallocBinned2Panel(const FStatMemory& In
             [
                 SNew(STextBlock)
                 .Clipping(EWidgetClipping::Inherit)
-                .Text(LOCTEXT("Cached free OS pagesValue_LOC", "0"))
+                .Text(FText::FromString(InFStatMemory.CachedFreeOSPages))
                 .TextStyle(&HeaderTextBlockStyle)
             ]
         ]
     ;
     return MallocBinned2Panel;
+}
+
+TSharedRef<SWidget> SStatTab::ConstructMemoryStatsPanel(const FStatMemory& InFStatMemory)
+{
+    // 标题字体样式
+    const FTextBlockStyle HeaderTitleTextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 22))
+        .SetColorAndOpacity(FLinearColor::White);
+
+    // 内存具体大小的字体样式
+    const FTextBlockStyle TextBlockStyle =
+        FTextBlockStyle()
+        .SetFont(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Light.ttf"), 14))
+        .SetColorAndOpacity(FLinearColor::White);
+
+    const FText FMemStackText = FText::Format(
+        LOCTEXT("FMemStackText", "FMemStack (gamethread) current size: {0} MB"),
+        FText::FromString(InFStatMemory.GameThreadCurrentSize));
+
+    const FText FPageAllocatorTextUsed = FText::Format(
+        LOCTEXT("FPageAllocatorTextUsedText", "FPageAllocator (all threads) allocation size\n\t\t used {0} MB,\n\t\t unused {1} MB"),
+        FText::FromString(InFStatMemory.ThreadPageAllocatorUsed),
+        FText::FromString(InFStatMemory.ThreadPageAllocatorUnused));
+
+    // NametableMemoryUsage
+    const FText NametableMemoryText = FText::Format(
+        LOCTEXT("NametableMemoryText", "Nametable memory usage: {0} MB"),
+        FText::FromString(InFStatMemory.NametableMemoryUsage));
+
+    // AssetRegistryMemoryUsage
+    const FText AssetRegistryMemoryUsageText = FText::Format(
+        LOCTEXT("AssetRegistryMemoryUsageText", "AssetRegistry memory usage: {0} MB"),
+        FText::FromString(InFStatMemory.AssetRegistryMemoryUsage));
+    
+    
+    auto MemoryStatsPanel =
+        SNew(SVerticalBox)
+
+        // Memory Stats
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Fill)
+        [
+            SNew(STextBlock)
+            .Clipping(EWidgetClipping::Inherit)
+            .Text(LOCTEXT("Memory Stats_LOC", "Memory Stats:"))
+            .TextStyle(&HeaderTitleTextBlockStyle)
+        ]
+
+        // FMemStack (gamethread) current size
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(FMemStackText)
+        ]
+
+        // FPageAllocator (all threads) allocation size [used/ unused]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(FPageAllocatorTextUsed)
+        ]
+
+        // Nametable memory usage
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(NametableMemoryText)
+        ]
+
+        // AssetRegistry memory usage
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(STextBlock)
+           .Clipping(EWidgetClipping::Inherit)
+           .TextStyle(&TextBlockStyle)
+           .Text(AssetRegistryMemoryUsageText)
+        ];
+
+    return MemoryStatsPanel;
 }
 
 FTextBlockStyle SStatTab::GetStatTextBlockStyle()
