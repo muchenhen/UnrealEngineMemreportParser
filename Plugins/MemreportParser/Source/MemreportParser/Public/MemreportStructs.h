@@ -29,7 +29,7 @@ struct FStatMemory
     FString VirtualMemoryFree;
     // 设备的总虚拟内存
     FString VirtualMemoryTotal;
-    
+
     /*---FMallocBinned2 Mem report---*/
     // 内存分配器使用的页面大小
     FString ConstantsBinnedPageSize;
@@ -123,7 +123,6 @@ struct FObjectsStat
     void Print() const;
 
     void Empty();
-    
 };
 
 struct FSpawnedActor
@@ -192,10 +191,17 @@ struct FTextureMemory
     FString Streaming;
     // 使用次数
     FString UsageCount;
-    
+
     static TArray<FString> GetHeader();
 
-     TArray<FString> GetDataArray() const;
+    TArray<FString> GetDataArray() const;
+};
+
+struct FPFFormatStat
+{
+    FString Name;
+    FString InMem;
+    FString OnDisk;
 };
 
 struct FTextureGroupStat
@@ -218,8 +224,13 @@ struct FTextureTotalStat
     FString Count;
     // 表示纹理的数量，不包括LODGroup为TEXTUREGROUP_World的纹理。
     FString CountApplicableToMin;
+    // 每一种PF格式的统计信息
+    TArray<FPFFormatStat> PFFormatStats;
     // 每一个TextureGroup的统计信息
     TArray<FTextureGroupStat> TextureGroupStats;
+
+    public:
+    
 };
 
 enum ECSVFileType
@@ -284,7 +295,7 @@ struct FParticleSystemsTotal
     FString ComponentResourceSize;
     // 组件的真实资源大小，运行时的大小
     FString ComponentTrueResourceSize;
-    
+
 public:
     FString GetSizeInKB() const;
 };

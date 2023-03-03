@@ -56,7 +56,7 @@ void UMemreportParserManager::LoadFiles()
                 FileStatData.CreationTime;
                 FileStatData.FileSize;
             }
-            
+
             for (auto& FileContent : FileContents)
             {
                 FString FileName = FileContent.Key.Replace(TEXT(".memreport"), TEXT(""));
@@ -483,14 +483,14 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
             {
                 Strings.Add(RegexMatcher.GetCaptureGroup(0));
             }
-            if (Strings.Num()>=2)
+            if (Strings.Num() >= 2)
             {
                 StatMemory.ProcessPhysicalMemoryUsed = Strings[0];
                 StatMemory.ProcessPhysicalMemoryPeak = Strings[1];
             }
             continue;
         }
-        
+
         // Process Virtual Memory
         if (String.Contains("Process Virtual Memory"))
         {
@@ -552,7 +552,7 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
         {
             TArray<FString> Output;
             String.ParseIntoArray(Output, TEXT("="), true);
-            if (Output.Num() >=2)
+            if (Output.Num() >= 2)
             {
                 StatMemory.ConstantsBinnedPageSize = Output[1];
             }
@@ -564,13 +564,13 @@ FStatMemory UMemreportParserManager::StatParser(const TArray<FString>& StringArr
         {
             TArray<FString> Output;
             String.ParseIntoArray(Output, TEXT("="), true);
-            if (Output.Num() >=2)
+            if (Output.Num() >= 2)
             {
                 StatMemory.ConstantsBinnedAllocationGranularity = Output[1];
             }
             continue;
         }
-        
+
         // Small Pool Allocations
         if (String.Contains("Small Pool Allocations"))
         {
@@ -1238,94 +1238,129 @@ FTextureMemory UMemreportParserManager::TextureMemoryRowSplit(const FString& Str
 
 FTextureTotalStat UMemreportParserManager::TextureTotalStatParser(const TArray<FString>& StringArray, const int& StartTextureTotal, const int& EndTextureTotal)
 {
+    /* 处理形如下面的字符串
+        Total size: InMem= 99.82 MB  OnDisk= 186.53 MB  Count=1175, CountApplicableToMin=921
+        Total PF_Unknown size: InMem= 1.68 MB  OnDisk= 1.68 MB 
+        Total PF_B8G8R8A8 size: InMem= 3.49 MB  OnDisk= 5.12 MB 
+        Total PF_G8 size: InMem= 5.09 MB  OnDisk= 5.24 MB 
+        Total PF_FloatRGBA size: InMem= 0.01 MB  OnDisk= 0.01 MB 
+        Total PF_ASTC_4x4 size: InMem= 24.30 MB  OnDisk= 24.30 MB 
+        Total PF_ASTC_6x6 size: InMem= 65.26 MB  OnDisk= 150.18 MB 
+        Total TEXTUREGROUP_World size: InMem= 19.61 MB  OnDisk= 36.23 MB 
+        Total TEXTUREGROUP_WorldNormalMap size: InMem= 5.84 MB  OnDisk= 7.32 MB 
+        Total TEXTUREGROUP_WorldSpecular size: InMem= 5.16 MB  OnDisk= 5.87 MB 
+        Total TEXTUREGROUP_Character size: InMem= 5.38 MB  OnDisk= 23.74 MB 
+        Total TEXTUREGROUP_CharacterNormalMap size: InMem= 2.05 MB  OnDisk= 15.51 MB 
+        Total TEXTUREGROUP_CharacterSpecular size: InMem= 3.54 MB  OnDisk= 13.78 MB 
+        Total TEXTUREGROUP_Effects size: InMem= 23.67 MB  OnDisk= 49.50 MB 
+        Total TEXTUREGROUP_Skybox size: InMem= 2.96 MB  OnDisk= 2.96 MB 
+        Total TEXTUREGROUP_UI size: InMem= 24.45 MB  OnDisk= 24.45 MB 
+        Total TEXTUREGROUP_Lightmap size: InMem= 2.80 MB  OnDisk= 2.80 MB 
+        Total TEXTUREGROUP_Shadowmap size: InMem= 4.34 MB  OnDisk= 4.34 MB 
+        Total TEXTUREGROUP_Bokeh size: InMem= 0.02 MB  OnDisk= 0.02 MB 
+        Total TEXTUREGROUP_Pixels2D size: InMem= 0.02 MB  OnDisk= 0.02 MB 
+     */
     FTextureTotalStat TextureTotalStat;
     for (int i = StartTextureTotal; i < EndTextureTotal; i++)
     {
         FString String = StringArray[i];
-        String = String.Replace(TEXT("MB"), TEXT(""));
-        String = String.Replace(TEXT(" "), TEXT(""));
-        String.TrimStartAndEndInline();
-        FRegexPattern RegexPattern(TEXT("[A-Za-z]+=[0-9]+.[0-9]+"));
-
-        TArray<FString> Results;
-        TArray<FString> OutStrings;
-
-        if (i == StartTextureTotal)
+        // String为空则跳过
+        if (String.IsEmpty())
         {
-            FRegexMatcher RegexMatcher(RegexPattern, String);
+            continue;
+        }
+        // 获取第7个字符
+        TCHAR Char = String[6];
+        // 如果第7个字符是s，则说明是Total size: InMem= 99.82 MB  OnDisk= 186.53 MB  Count=1175, CountApplicableToMin=921
+        if (Char == 's')
+        {
+            // 去掉String中所有的空格
+            FString NewString = String.Replace(TEXT(" "), TEXT(""));
+            // 再去掉所有的MB
+            NewString = NewString.Replace(TEXT("MB"), TEXT(""));
+            // 使用正则匹配[\d.]+ 检查是否一共有4个匹配项 InMem OnDisk Count CountApplicableToMin 如果是的话，就把这4个匹配项的值赋值给TextureTotalStat
+            FRegexPattern RegexPattern(TEXT("[\\d.]+"));
+            FRegexMatcher RegexMatcher(RegexPattern, NewString);
+            int MatchCount = 0;
             while (RegexMatcher.FindNext())
             {
-                Results.Add(RegexMatcher.GetCaptureGroup(0));
-            }
-            if (Results.Num() == 2)
-            {
-                RegexPattern = FRegexPattern(TEXT("[A-Za-z]+=[0-9]+"));
-                FRegexMatcher Matcher(RegexPattern, String);
-                int skip = 0;
-
-                while (Matcher.FindNext())
+                FString MatchString = RegexMatcher.GetCaptureGroup(0);
+                if (MatchCount == 0)
                 {
-                    if (skip>=2)
-                    {
-                        Results.Add(Matcher.GetCaptureGroup(0));
-                    }
-                    skip++;
+                    TextureTotalStat.TotalSizeInMem = MatchString;
                 }
-            }
-
-            if (Results.Num() == 4)
-            {
-                Results[0].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.TotalSizeInMem = OutStrings[1];
-                OutStrings.Empty();
-                Results[1].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.TotalSizeOnDisk = OutStrings[1];
-                OutStrings.Empty();
-                Results[2].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.Count = OutStrings[1];
-                OutStrings.Empty();
-                Results[3].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.CountApplicableToMin = OutStrings[1];
-                OutStrings.Empty();
-                Results.Empty();
-            }
-            else if (Results.Num() == 3)
-            {
-                Results[0].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.TotalSizeInMem = OutStrings[1];
-                OutStrings.Empty();
-                Results[1].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.TotalSizeOnDisk = OutStrings[1];
-                OutStrings.Empty();
-                Results[2].ParseIntoArray(OutStrings, TEXT("="), true);
-                TextureTotalStat.Count = OutStrings[1];
-                OutStrings.Empty();
-            }
-            else
-            {
-                UE_LOG(LogMemreportParser, Error, TEXT("TextureTotalStatParser Failed!"));
+                else if (MatchCount == 1)
+                {
+                    TextureTotalStat.TotalSizeOnDisk = MatchString;
+                }
+                else if (MatchCount == 2)
+                {
+                    TextureTotalStat.Count = MatchString;
+                }
+                else if (MatchCount == 3)
+                {
+                    TextureTotalStat.CountApplicableToMin = MatchString;
+                }
+                MatchCount++;
             }
         }
-        else
+
+        // 如果第7个字符是P，说明是PF格式行
+        else if (Char == 'P')
         {
-            FTextureGroupStat TextureGroupStat;
-            String = String.Replace(TEXT("Total"), TEXT(""));
-            String = String.Replace(TEXT("size"), TEXT(""));
-            String.ParseIntoArray(OutStrings, TEXT(":"), true);
-            TextureGroupStat.Name = OutStrings[0];
-            FRegexMatcher RegexMatcher(RegexPattern, OutStrings[1]);
-            TArray<FString> TempStrings;
+            // 使用正则PF_\w+|[\d.]+进行匹配
+            // 检查是否一共有3个匹配项 PF_XXX InMem OnDisk 如果是的话，就把这3个匹配项的值赋值给TextureTotalStat
+            FRegexPattern RegexPattern(TEXT("PF_\\w+|[\\d.]+"));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            int MatchCount = 0;
+            FPFFormatStat PFFormatStat;
             while (RegexMatcher.FindNext())
             {
-                Results.Add(RegexMatcher.GetCaptureGroup(0));
+                FString MatchString = RegexMatcher.GetCaptureGroup(0);
+                if (MatchCount == 0)
+                {
+                    PFFormatStat.Name = MatchString;
+                }
+                else if (MatchCount == 1)
+                {
+                    PFFormatStat.InMem = MatchString;
+                }
+                else if (MatchCount == 2)
+                {
+                    PFFormatStat.OnDisk = MatchString;
+                    TextureTotalStat.PFFormatStats.Add(PFFormatStat);
+                }
+                MatchCount++;
             }
-            Results[0].ParseIntoArray(TempStrings, TEXT("="));
-            TextureGroupStat.InMem = TempStrings[1];
-            TempStrings.Empty();
-            Results[1].ParseIntoArray(TempStrings, TEXT("="));
-            TextureGroupStat.OnDisk = TempStrings[1];
-            TextureTotalStat.TextureGroupStats.Add(TextureGroupStat);
-            TempStrings.Empty();
+        }
+
+        // 如果第7个字符是T，说明是TEXTUREGROUP格式行
+        else if (Char == 'T')
+        {
+            // 使用正则TEXTUREGROUP_\w+|[\d.]+进行匹配
+            // 检查是否一共有3个匹配项 TEXTUREGROUP_XXX InMem OnDisk 如果是的话，就把这3个匹配项的值赋值给TextureTotalStat
+            FRegexPattern RegexPattern(TEXT("TEXTUREGROUP_\\w+|[\\d.]+"));
+            FRegexMatcher RegexMatcher(RegexPattern, String);
+            int MatchCount = 0;
+            FTextureGroupStat TextureGroupStat;
+            while (RegexMatcher.FindNext())
+            {
+                FString MatchString = RegexMatcher.GetCaptureGroup(0);
+                if (MatchCount == 0)
+                {
+                    TextureGroupStat.Name = MatchString;
+                }
+                else if (MatchCount == 1)
+                {
+                    TextureGroupStat.InMem = MatchString;
+                }
+                else if (MatchCount == 2)
+                {
+                    TextureGroupStat.OnDisk = MatchString;
+                    TextureTotalStat.TextureGroupStats.Add(TextureGroupStat);
+                }
+                MatchCount++;
+            }
         }
     }
     return TextureTotalStat;
@@ -1459,34 +1494,25 @@ FString UMemreportParserManager::GetCSVFileName(const FString& OriFileName, ECSV
 
     switch (CSVFileType)
     {
-    case Obj:
-        FileName += TEXT("-Obj");
+    case Obj: FileName += TEXT("-Obj");
         break;
-    case SpawnedActors:
-        FileName += TEXT("-SpawnedActors");
+    case SpawnedActors: FileName += TEXT("-SpawnedActors");
         break;
-    case ConfigCache:
-        FileName += TEXT("-ConfigCache");
+    case ConfigCache: FileName += TEXT("-ConfigCache");
         break;
-    case Texture:
-        FileName += TEXT("-Texture");
+    case Texture: FileName += TEXT("-Texture");
         break;
-    case ParticleSystems:
-        FileName += TEXT("-ParticleSystems");
+    case ParticleSystems: FileName += TEXT("-ParticleSystems");
         break;
-    case SkeletalMeshes:
-        FileName += TEXT("-SkeletalMeshes");
+    case SkeletalMeshes: FileName += TEXT("-SkeletalMeshes");
         break;
-    case StaticMeshes:
-        FileName += TEXT("-StaticMeshes");
+    case StaticMeshes: FileName += TEXT("-StaticMeshes");
         break;
-    case StaticMeshComponents:
-        FileName += TEXT("-StaticMeshComponents");
+    case StaticMeshComponents: FileName += TEXT("-StaticMeshComponents");
         break;
-    default:
-        break;
+    default: break;
     }
-    
+
     FileName += TEXT(".csv");
     return FileName;
 }
@@ -1515,8 +1541,7 @@ bool UMemreportParserManager::CheckCurrentFile()
 
 void UMemreportParserManager::SaveObjListToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FObj> ObjectList = FilesData[CurrentFileName].ObjectList;
     const FString FileName = GetCSVFileName(FileNames[0], Obj);
@@ -1541,8 +1566,7 @@ void UMemreportParserManager::SaveObjListToCSV()
 
 void UMemreportParserManager::SaveSpawnedActorsToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FSpawnedActor> SpawnedActors = FilesData[CurrentFileName].SpawnedActors;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::SpawnedActors);
@@ -1566,9 +1590,8 @@ void UMemreportParserManager::SaveSpawnedActorsToCSV()
 
 void UMemreportParserManager::SaveConfigCacheMemoryToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
-    
+    if (!CheckCurrentFile()) return;
+
     TArray<FConfigCache> ConfigCaches = FilesData[CurrentFileName].ConfigCaches;
     const FString FileName = GetCSVFileName(FileNames[0], ConfigCache);
 
@@ -1591,9 +1614,8 @@ void UMemreportParserManager::SaveConfigCacheMemoryToCSV()
 
 void UMemreportParserManager::SaveTexturesToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
-    
+    if (!CheckCurrentFile()) return;
+
     TArray<FTextureMemory> Textures = FilesData[CurrentFileName].TextureMemories;
     const FString FileName = GetCSVFileName(FileNames[0], Texture);
 
@@ -1616,12 +1638,11 @@ void UMemreportParserManager::SaveTexturesToCSV()
 
 void UMemreportParserManager::SaveParticleSystemsToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FParticleSystem> ParticleSystems = FilesData[CurrentFileName].ParticleSystems;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::ParticleSystems);
-    
+
     TArray<FString> OutStrings;
     OutStrings.Add(TransFStringArrayToFString(FParticleSystem::GetHeader()));
     for (auto& ParticleSystem : ParticleSystems)
@@ -1641,8 +1662,7 @@ void UMemreportParserManager::SaveParticleSystemsToCSV()
 
 void UMemreportParserManager::SaveSkeletalMeshesToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FObjClass> SkeletalMeshes = FilesData[CurrentFileName].SkeletalMeshObjects;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::SkeletalMeshes);
@@ -1666,8 +1686,7 @@ void UMemreportParserManager::SaveSkeletalMeshesToCSV()
 
 void UMemreportParserManager::SaveStaticMeshesToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FObjClass> StaticMeshes = FilesData[CurrentFileName].StaticMeshObjects;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshes);
@@ -1691,8 +1710,7 @@ void UMemreportParserManager::SaveStaticMeshesToCSV()
 
 void UMemreportParserManager::SaveStaticMeshComponentsToCSV()
 {
-    if (!CheckCurrentFile())
-        return;
+    if (!CheckCurrentFile()) return;
 
     TArray<FObjClass> StaticMeshComponents = FilesData[CurrentFileName].StaticMeshComponentObjects;
     const FString FileName = GetCSVFileName(FileNames[0], ECSVFileType::StaticMeshComponents);

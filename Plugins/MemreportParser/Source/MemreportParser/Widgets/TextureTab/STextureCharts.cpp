@@ -12,6 +12,9 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void STextureCharts::Construct(const FArguments& InArgs)
 {
+    TextureTotalStat = InArgs._TextureTotalStat;
+    
+    
     ChartSwitchWidget = SNew(SWidgetSwitcher);
 
     FormatChart = MakeFormatChart();
