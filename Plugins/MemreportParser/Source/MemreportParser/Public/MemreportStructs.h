@@ -228,6 +228,9 @@ struct FTextureTotalStat
     TArray<FPFFormatStat> PFFormatStats;
     // 每一个TextureGroup的统计信息
     TArray<FTextureGroupStat> TextureGroupStats;
+
+    public:
+    
 };
 
 enum ECSVFileType

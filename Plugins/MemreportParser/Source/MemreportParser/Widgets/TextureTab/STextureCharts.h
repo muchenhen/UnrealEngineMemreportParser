@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "MemreportStructs.h"
+
+typedef TSharedPtr<FTextureTotalStat> FTextureTotalStatPtr;
 
 /**
  * 
@@ -11,10 +14,8 @@
 class MEMREPORTPARSER_API STextureCharts : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(STextureCharts)
-        {
-        }
-
+    SLATE_BEGIN_ARGS(STextureCharts){}
+    SLATE_ARGUMENT(FTextureTotalStatPtr, TextureTotalStat)
     SLATE_END_ARGS()
 
     /** Constructs this widget with InArgs */
@@ -34,4 +35,7 @@ public:
     TSharedPtr<SWidget> FormatChart;
 
     TSharedPtr<SWidget> GroupChart;
+
+private:
+    FTextureTotalStatPtr TextureTotalStat;
 };

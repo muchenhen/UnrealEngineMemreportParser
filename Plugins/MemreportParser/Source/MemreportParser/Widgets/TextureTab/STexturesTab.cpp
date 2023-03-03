@@ -31,11 +31,11 @@ void STexturesTab::Construct(const FArguments& InArgs)
                         .TextureTotalStat(TextureTotalStat)
                     ]
 
-                    + SHorizontalBox::Slot()
-                    .FillWidth(70.f)
-                    [
-                        SNew(STextureCharts)
-                    ]
+                    // + SHorizontalBox::Slot()
+                    // .FillWidth(70.f)
+                    // [
+                    //     SNew(STextureCharts)
+                    // ]
                 ]
 
                 + SVerticalBox::Slot()
