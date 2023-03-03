@@ -34,6 +34,10 @@ public:
     TSharedRef<ITableRow> MemreportList_OnGenerateRow(TSharedPtr<FStatMemory> InMemreportView, const TSharedRef<STableViewBase>& OwnerTable);
     
     void MemreportList_OnMouseButtonDoubleClick(TSharedPtr<FStatMemory> StatMemory);
+
+    TSharedPtr<SWidget> MemreportList_GetContextMenu();
+
+    void MemreportList_OnSelectionChanged(TSharedPtr<FStatMemory, ESPMode::NotThreadSafe> StatMemory, ESelectInfo::Type Arg);
     
     TSharedRef<SWidget> ConstructFilesPanel();
     

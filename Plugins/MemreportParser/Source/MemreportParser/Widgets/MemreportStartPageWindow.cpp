@@ -3,6 +3,7 @@
 #include "MemreportParserManager.h"
 #include "SSingleMemreportFileWindow.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include "MultiFileWindow/SMultiFileComparison.h"
 
 #define LOCTEXT_NAMESPACE "MemreportStartPageWindow"
 
@@ -46,6 +47,12 @@ void SMemreportStartPageWindow::SetMemreportViewModels(TArray<FStatMemory> StatM
         Model.Get()->LargePoolOSAllocated = StatMemory.LargePoolOSAllocated;
         MemreportViewModels.Add(Model);
     }
+
+    // 将SinceBootTime转换为浮点数 然后对MemreportViewModels进行排序 将SinceBootTime最小的放在前面
+    MemreportViewModels.Sort([](const TSharedPtr<FStatMemory>& A, const TSharedPtr<FStatMemory>& B) {
+        return A.Get()->SinceBootTime < B.Get()->SinceBootTime;
+    });
+    
     if (MemreportListView.IsValid())
     {
         MemreportListView->RequestListRefresh();
@@ -85,6 +92,43 @@ void SMemreportStartPageWindow::MemreportList_OnMouseButtonDoubleClick(TSharedPt
     }
 }
 
+TSharedPtr<SWidget> SMemreportStartPageWindow::MemreportList_GetContextMenu()
+{
+    TSharedPtr<SWidget> Menu = SNew(SBox);
+    const int SelectedItemsNum = MemreportListView->GetSelectedItems().Num();
+    if (SelectedItemsNum > 1)
+    {
+        TArray<TSharedPtr<FStatMemory, ESPMode::NotThreadSafe>> Items = MemreportListView->GetSelectedItems();
+        Menu =
+        SNew(SBox)
+        [
+            SNew(SVerticalBox)
+
+            + SVerticalBox::Slot()
+              .AutoHeight()
+              .Padding(5.0f)
+            [
+                SNew(SButton)
+                .Text(LOCTEXT("CompareMultiFile_Loc", "Compare"))
+                .OnClicked_Lambda([this, Items]()
+                {
+                    // 创建新窗口 SMultiFileComparison
+                    const auto MultiFileComWindow = SNew(SMultiFileComparison);
+                    FSlateApplication::Get().AddWindow(MultiFileComWindow, true);
+                    return FReply::Handled();
+                })
+            ]
+        ];
+    }
+
+    return Menu;
+}
+
+void SMemreportStartPageWindow::MemreportList_OnSelectionChanged(TSharedPtr<FStatMemory, ESPMode::NotThreadSafe> StatMemory, ESelectInfo::Type Arg)
+{
+    
+}
+
 TSharedRef<SWidget> SMemreportStartPageWindow::ConstructFilesPanel()
 {
     TSharedRef<SWidget> Widget =
@@ -108,13 +152,13 @@ TSharedRef<SWidget> SMemreportStartPageWindow::ConstructFilesPanel()
             SAssignNew(MemreportListView, SListView<TSharedPtr<FStatMemory>>)
             .IsFocusable(true)
             .ItemHeight(20.0f)
-            .SelectionMode(ESelectionMode::Single)
-            // .OnSelectionChanged(this, &SStartPageWindow::TraceList_OnSelectionChanged)
+            .SelectionMode(ESelectionMode::Multi)
+            .OnSelectionChanged(this, &SMemreportStartPageWindow::MemreportList_OnSelectionChanged)
             .OnMouseButtonDoubleClick(this, &SMemreportStartPageWindow::MemreportList_OnMouseButtonDoubleClick)
             .ListItemsSource(&MemreportViewModels)
             .OnGenerateRow(this, &SMemreportStartPageWindow::MemreportList_OnGenerateRow)
             .ConsumeMouseWheel(EConsumeMouseWheel::Always)
-            //.OnContextMenuOpening(FOnContextMenuOpening::CreateSP(this, &SStartPageWindow::TraceList_GetContextMenu))
+            .OnContextMenuOpening(FOnContextMenuOpening::CreateSP(this, &SMemreportStartPageWindow::MemreportList_GetContextMenu))
             .HeaderRow
             (
                 SNew(SHeaderRow)
@@ -130,6 +174,7 @@ TSharedRef<SWidget> SMemreportStartPageWindow::ConstructFilesPanel()
                 + SHeaderRow::Column(FName(TEXT("SinceBootTime")))
                   .FillWidth(1.0f)
                   .DefaultLabel(LOCTEXT("BootTimeColumn", "Boot Time"))
+                  .SortPriority(EColumnSortPriority::Max)
 
                 + SHeaderRow::Column(FName(TEXT("ProcessPhysicalMemoryUsed")))
                   .FillWidth(1.0f)
